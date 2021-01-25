@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 
 class Company(models.Model):
@@ -91,7 +92,7 @@ class Setup(models.Model):
         return f"{self.hostname} | {self.ip} | {self.description}"
 
 
-class Credentials(models.Model):
+class Credential(models.Model):
     """Model representing the credentials to log in a Configuration Item"""
 
     username = models.CharField(max_length=50, blank=True, null=True)
@@ -108,7 +109,7 @@ class CI(models.Model):
 
     appliances = models.ManyToManyField(Appliance)
     setup = models.OneToOneField(Setup, on_delete=models.SET_NULL, null=True)
-    credentials = models.OneToOneField(Credentials, on_delete=models.SET_NULL, null=True)
+    credential = models.OneToOneField(Credential, on_delete=models.SET_NULL, null=True)
     site = models.ForeignKey(Site, on_delete=models.SET_NULL, null=True)
     contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, null=True)
 
