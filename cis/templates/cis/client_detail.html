@@ -1,0 +1,26 @@
+{% extends "base_generic.html" %}
+
+{% block title %}{{ client }}{% endblock %}
+
+{% block content %}
+<h1 class="h5 my-4">{{ client }}</h1>
+
+<h2 class="h5 my-4">Sites</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for site in client.site_set.all %}
+        <tr>
+            <td>{{ site.name }}</td>
+            <td>{{ site.description }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

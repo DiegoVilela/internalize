@@ -21,6 +21,9 @@ class Company(models.Model):
 class Client(Company):
     """Model representing a Client company"""
 
+    def get_absolute_url(self):
+        return reverse('cis:client_detail', args=[self.id])
+
 
 class Site(models.Model):
     """Model representing a location of a Client"""
