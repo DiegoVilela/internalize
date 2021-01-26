@@ -1,0 +1,103 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Configuration Item{% endblock %}
+
+{% block content %}
+<h1 class="h5 my-4">{{ ci }}</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <h2 class="h5 my-4">Appliances</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Serial Number</th>
+                    <th>Manufacturer</th>
+                    <th>Model</th>
+                    <th>Virtual</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for appliance in ci.appliances.all %}
+                <tr>
+                    <td>{{ appliance.serial_number }}</td>
+                    <td>{{ appliance.manufacturer }}</td>
+                    <td>{{ appliance.model }}</td>
+                    <td>{{ appliance.virtual }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-6">
+        <h2 class="h5 my-4">Setup</h2>
+        <table class="table">
+            <tr>
+                <th>Hostname</th>
+                <td>{{ ci.setup.hostname }}</td>
+            </tr>
+            <tr>
+                <th>IP</th>
+                <td>{{ ci.setup.ip }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ ci.setup.description }}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>{{ ci.setup.status }}</td>
+            </tr>
+            <tr>
+                <th>Business Impact</th>
+                <td>{{ ci.setup.business_impact }}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <h2 class="h5 my-4">Contract</h2>
+        <table class="table">
+            <tr>
+                <th>Name</th>
+                <td>{{ ci.contract.name }}</td>
+            </tr>
+            <tr>
+                <th>Begin</th>
+                <td>{{ ci.contract.begin }}</td>
+            </tr>
+            <tr>
+                <th>End</th>
+                <td>{{ ci.contract.end }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ ci.contract.description }}</td>
+            </tr>
+        </table>
+    </div>
+    <div class="col-md-6">
+        <h2 class="h5 my-4">Credentials</h2>
+        <table class="table">
+            <tr>
+                <th>Username</th>
+                <td>{{ ci.credential.username }}</td>
+            </tr>
+            <tr>
+                <th>Password</th>
+                <td>{{ ci.credential.password }}</td>
+            </tr>
+            <tr>
+                <th>Enable Password</th>
+                <td>{{ ci.credential.enable_password }}</td>
+            </tr>
+            <tr>
+                <th>Instructions</th>
+                <td>{{ ci.credential.instructions }}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+{% endblock %}

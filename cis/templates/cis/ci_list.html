@@ -1,0 +1,25 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Configuration Items{% endblock %}
+
+{% block content %}
+<h1 class="h5 my-4">Configuration Items</h1>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Appliances</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for ci in ci_list %}
+        <tr>
+            <td>
+                <a href="{{ ci.get_absolute_url }}">{{ ci }}</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
