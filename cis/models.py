@@ -85,9 +85,9 @@ class Appliance(models.Model):
 class Setup(models.Model):
     """Model representing a Setup applied to a Configuration Item"""
 
-    hostname = models.CharField(max_length=50)
-    ip = models.GenericIPAddressField()
-    description = models.CharField(max_length=255)
+    hostname = models.CharField(max_length=50, unique=True)
+    ip = models.GenericIPAddressField(unique=True)
+    description = models.CharField(max_length=255, unique=True)
     status = models.CharField(max_length=100, default='deployed')
     business_impact = models.CharField(max_length=10, default='low')
 
@@ -111,7 +111,7 @@ class CI(models.Model):
     """Model representing a Configuration Item"""
 
     appliances = models.ManyToManyField(Appliance)
-    setup = models.OneToOneField(Setup, on_delete=models.SET_NULL, null=True)
+    setup = models.OneToOneField(Setup, on_delete=models.CASCADE, primary_key=True)
     credential = models.OneToOneField(Credential, on_delete=models.SET_NULL, null=True)
     site = models.ForeignKey(Site, on_delete=models.SET_NULL, null=True)
     contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, null=True)
@@ -120,4 +120,4 @@ class CI(models.Model):
         return f"{self.site} | {self.setup}"
 
     def get_absolute_url(self):
-        return reverse('cis:ci_detail', args=[self.id])
+        return reverse('cis:ci_detail', args=[self.pk])
