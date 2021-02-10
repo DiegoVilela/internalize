@@ -1,11 +1,12 @@
 from datetime import datetime
 from openpyxl import load_workbook
-from .models import Client, Site, CI, Appliance, Setup, Credential, Site, Contract
+from .models import Client, Site, CI, Appliance, Setup, Credential, Site, Contract, Manufacturer
 from .cis_mapping import CLIENT, SETUP_HOSTNAME, SETUP_IP, SETUP_DESCRIPTION, \
     SETUP_STATUS, SETUP_BUSINESS_IMPACT, SITE, SITE_DESCRIPTION, CONTRACT, \
     CONTRACT_BEGIN, CONTRACT_END, CONTRACT_DESCRIPTION, CREDENTIAL_USERNAME, \
     CREDENTIAL_PASSWORD, CREDENTIAL_ENABLE_PASSWORD, CREDENTIAL_INSTRUCTIONS, \
-    SUMMARY_SHEET, CIS_SHEET
+    SUMMARY_SHEET, CIS_SHEET, APPLIANCES_SHEET, APPLIANCE_HOSTNAME, APPLIANCE_SERIAL_NUMBER, \
+    APPLIANCE_MANUFACTURER, APPLIANCE_MODEL, APPLIANCE_VIRTUAL
 
 
 class CILoader:
@@ -14,18 +15,25 @@ class CILoader:
         self.client = self._get_client()
         self.sites = {}
         self.contracts = {}
+        self.manufacturers = {}
 
     def save(self):
         cis_sheet = self._workbook[CIS_SHEET]
+        appliances_sheet = self._workbook[APPLIANCES_SHEET]
         response = FileHandlerResponse(self.client)
         for row in cis_sheet.iter_rows(min_row=2, values_only=True):
             try:
-                CI.objects.create(
-                    setup=self._get_setup(row),
+                setup = self._get_setup(row)
+                ci = CI.objects.create(
+                    setup=setup,
                     site=self._get_site(row),
                     contract=self._get_contract(row),
                     credential=self._get_credential(row)
                 )
+                for appl_row in appliances_sheet.iter_rows(min_row=2, values_only=True):
+                    if appl_row[APPLIANCE_HOSTNAME] == setup.hostname:
+                        ci.appliances.add(self._get_appliance(appl_row))
+
                 response.count_ci()
             except Exception as e:
                 response.add_error({'exception': e, 'row': row})
@@ -80,6 +88,24 @@ class CILoader:
         )
         credential.save()
         return credential
+
+    def _get_appliance(self, row):
+        appliance, created = Appliance.objects.get_or_create(
+            serial_number=row[APPLIANCE_SERIAL_NUMBER],
+            manufacturer=self._get_manufacturer(row[APPLIANCE_MANUFACTURER]),
+            model=row[APPLIANCE_MODEL],
+            virtual=bool(str(row[APPLIANCE_VIRTUAL]).strip())
+        )
+        return appliance
+
+    def _get_manufacturer(self, name):
+        if name in self.manufacturers:
+            return self.manufacturers[name]
+        else:
+            self.manufacturers[name], created = Manufacturer.objects.get_or_create(
+                name=name,
+            )
+            return self.manufacturers[name]
 
 
 class FileHandlerResponse:
