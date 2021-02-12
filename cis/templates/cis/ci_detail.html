@@ -21,7 +21,11 @@
             {% for appliance in ci.appliances.all %}
                 <tr>
                     <td>{{ appliance.serial_number }}</td>
-                    <td>{{ appliance.manufacturer }}</td>
+                    <td>
+                        <a href="{% url 'cis:manufacturer_detail' appliance.manufacturer.id %}">
+                            {{ appliance.manufacturer }}
+                        </a>
+                    </td>
                     <td>{{ appliance.model }}</td>
                     <td>{{ appliance.virtual }}</td>
                 </tr>

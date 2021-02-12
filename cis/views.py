@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 
-from .models import CI, Client
+from .models import CI, Client, Manufacturer, Appliance
 from .forms import UploadCIsForm
 from .loader import CILoader
 
@@ -20,6 +20,17 @@ class CIListView(ListView):
 
 class CIDetailView(DetailView):
     model = CI
+
+
+class ManufacturerDetailView(DetailView):
+    model = Manufacturer
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['num_appliances'] = Appliance.objects.filter(
+            manufacturer=context['manufacturer']
+        ).count()
+        return context
 
 
 def ci_upload(request):
