@@ -10,7 +10,7 @@ from .cis_mapping import CLIENT, SETUP_HOSTNAME, SETUP_IP, SETUP_DESCRIPTION, \
 
 
 class CILoader:
-    def __init__(self, file='cis/cis_fixtures.xlsx'):
+    def __init__(self, file):
         self._workbook = load_workbook(file, read_only=True, data_only=True)
         self.client = self._get_client()
         self.sites = {}

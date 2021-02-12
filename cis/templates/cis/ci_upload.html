@@ -1,0 +1,54 @@
+{% extends "base_generic.html" %}
+
+{% block title %}ATS Upload{% endblock %}
+
+{% block content %}
+    <h1 class="h5 my-4">ATS Upload{% if result.client.name %} | {{ result.client.name }}{% endif %}</h1>
+
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Upload" />
+    </form>
+
+    {% if result %}
+        <div class="row">
+            <div class="col-md-6">
+                <h2 class="h5 my-4">Summary</h2>
+
+                <table class="table">
+                    <tr>
+                        <th>Quantidade de CIs inseridos</th>
+                        <td>{{ result.cis_inserted }}</td>
+                    </tr>
+                    {% if result.errors %}
+                        <tr>
+                            <th>Quantidade de erros</th>
+                            <td class="text-danger">{{ result.errors|length }}</td>
+                        </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        {% if result.errors %}
+        <h2 class="h5 my-4">Errors Details</h2>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Error</th>
+                    <th>Row</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for error in result.errors %}
+                    <tr>
+                        <td>{{ error.exception }}</td>
+                        <td>{{ error.row }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    {% endif %}
+{% endblock %}
