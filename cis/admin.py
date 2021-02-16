@@ -1,17 +1,12 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+
 from .models import (
-    Client,
-    Site,
-    ISP,
-    Manufacturer,
-    Circuit,
-    Contract,
-    Appliance,
-    Setup,
-    Credential,
-    CI
+    User, Client, Site, ISP, Circuit,
+    CI, Manufacturer, Appliance, Setup, Contract, Credential
 )
 
+admin.site.register(User, UserAdmin)
 admin.site.register(Client)
 admin.site.register(Site)
 admin.site.register(ISP)

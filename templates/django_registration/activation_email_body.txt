@@ -1,0 +1,7 @@
+Hi {{ user }},
+
+Please, confirm your registration by clicking the link below:
+
+{{ scheme }}://{{ site }}{% url 'django_registration_activate' activation_key=activation_key %}
+
+Expiration days {{ expiration_days }}

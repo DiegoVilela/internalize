@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 openpyxl = "*"
 Django = "*"
+django-registration = "*"
 
 [dev-packages]
 

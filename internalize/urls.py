@@ -16,9 +16,20 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
+from django_registration.backends.activation.views import RegistrationView
+
+from cis.forms import UserForm
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('cis/', include('cis.urls')),
     path('', RedirectView.as_view(url='/cis/')),
+    path('accounts/register/',
+         RegistrationView.as_view(
+             form_class=UserForm
+         ),
+         name='django_registration_register',
+         ),
+    path('accounts/', include('django_registration.backends.activation.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
