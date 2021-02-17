@@ -1,28 +1,32 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
 
 from .models import CI, Client, Manufacturer, Appliance
 from .forms import UploadCIsForm
 from .loader import CILoader
+from .mixins import UserApprovedMixin
 
 
-class ClientListView(ListView):
+class ClientListView(UserApprovedMixin, ListView):
     model = Client
 
 
-class ClientDetailView(DetailView):
+class ClientDetailView(UserApprovedMixin, DetailView):
     model = Client
 
 
-class CIListView(ListView):
+class CIListView(LoginRequiredMixin, ListView):
     model = CI
 
 
-class CIDetailView(DetailView):
+class CIDetailView(UserApprovedMixin, DetailView):
     model = CI
 
 
-class ManufacturerDetailView(DetailView):
+class ManufacturerDetailView(UserApprovedMixin, DetailView):
     model = Manufacturer
 
     def get_context_data(self, **kwargs):
@@ -33,7 +37,12 @@ class ManufacturerDetailView(DetailView):
         return context
 
 
+@login_required
 def ci_upload(request):
+    if not request.user.is_approved:
+        messages.warning(request, 'Your account needs to be approved. Please contact you Account Manager.')
+        return redirect('cis:ci_list')
+
     result = None
 
     if request.method == 'POST':

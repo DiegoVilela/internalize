@@ -6,6 +6,10 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     client = models.OneToOneField('Client', on_delete=models.CASCADE, blank=True, null=True)
 
+    @property
+    def is_approved(self):
+        return self.client or self.is_superuser
+
 
 class Company(models.Model):
     """Model representing an abstract Company.

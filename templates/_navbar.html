@@ -1,0 +1,47 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="{% url 'cis:ci_list' %}" style="font-family: 'Dancing Script', cursive;">Internalize</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    {% if user.is_authenticated %}
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="cisDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          CIs
+        </a>
+        <div class="dropdown-menu" aria-labelledby="cisDropdown">
+          <a class="dropdown-item" href="{% url 'cis:ci_list' %}">All</a>
+          <a class="dropdown-item" href="{% url 'cis:ci_upload' %}">Upload</a>
+        </div>
+      </li>
+      {% if user.is_superuser or user.client %}
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="clientsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Clients
+        </a>
+        <div class="dropdown-menu" aria-labelledby="clientsDropdown">
+          <a class="dropdown-item" href="{% url 'cis:client_list' %}">All</a>
+        </div>
+      </li>
+      {% endif %}
+    </ul>
+    {% endif %}
+
+    <ul class="navbar-nav ml-auto">
+      {% if user.is_authenticated %}
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+      </li>
+      {% else %}
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'django_registration_register' %}">Register</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'login' %}">Login</a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>
