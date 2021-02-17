@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
-    pass
+    client = models.OneToOneField('Client', on_delete=models.CASCADE, blank=True, null=True)
 
 
 class Company(models.Model):
