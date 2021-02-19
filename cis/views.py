@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, TemplateView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
@@ -8,6 +8,10 @@ from .models import CI, Client, Manufacturer, Appliance
 from .forms import UploadCIsForm
 from .loader import CILoader
 from .mixins import UserApprovedMixin
+
+
+class HomePageView(TemplateView):
+    template_name = 'cis/homepage.html'
 
 
 class ClientListView(UserApprovedMixin, ListView):
