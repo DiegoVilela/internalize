@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 
-from .models import CI, Client, Manufacturer, Appliance
+from .models import CI, Client, Manufacturer, Appliance, CIPack
 from .forms import UploadCIsForm
 from .loader import CILoader
 from .mixins import UserApprovedMixin
@@ -24,6 +24,9 @@ class ClientDetailView(UserApprovedMixin, DetailView):
 
 class CIListView(LoginRequiredMixin, ListView):
     model = CI
+
+    def get_queryset(self):
+        return CI.objects.filter(status=self.kwargs['status'])
 
 
 class CIDetailView(UserApprovedMixin, DetailView):
@@ -45,7 +48,7 @@ class ManufacturerDetailView(UserApprovedMixin, DetailView):
 def ci_upload(request):
     if not request.user.is_approved:
         messages.warning(request, 'Your account needs to be approved. Please contact you Account Manager.')
-        return redirect('cis:ci_list')
+        return redirect('cis:homepage')
 
     result = None
 
@@ -61,3 +64,21 @@ def ci_upload(request):
         'form': form,
         'result': result
     })
+
+
+@login_required
+def send_ci_pack(request):
+    if not request.user.is_approved:
+        messages.warning(request, 'Your account needs to be approved. Please contact you Account Manager.')
+        return redirect('cis:homepage')
+
+    if request.method == 'POST':
+        pack = CIPack(responsible=request.user)
+        pack.save()
+        pack.items.set(request.POST.getlist('cis'))
+
+        if pack.id:
+            pack.send()
+            messages.success(request, 'Pack created.')
+
+    return render(request, 'cis/homepage.html')

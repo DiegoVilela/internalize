@@ -33,6 +33,9 @@ class Client(Company):
     def get_absolute_url(self):
         return reverse('cis:client_detail', args=[self.id])
 
+    def __str__(self):
+        return self.name
+
 
 class Site(models.Model):
     """Model representing a location of a Client"""
@@ -119,14 +122,40 @@ class Credential(models.Model):
 class CI(models.Model):
     """Model representing a Configuration Item"""
 
+    STATUS_OPTIONS = (
+        (0, 'CREATED'),
+        (1, 'SENT'),
+        (2, 'APPROVED'),
+    )
     appliances = models.ManyToManyField(Appliance)
     setup = models.OneToOneField(Setup, on_delete=models.CASCADE, primary_key=True)
     credential = models.OneToOneField(Credential, on_delete=models.SET_NULL, null=True)
     site = models.ForeignKey(Site, on_delete=models.SET_NULL, null=True)
     contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, null=True)
+    status = models.PositiveSmallIntegerField(choices=STATUS_OPTIONS, default=0)
 
     def __str__(self):
         return f"{self.site} | {self.setup}"
 
     def get_absolute_url(self):
         return reverse('cis:ci_detail', args=[self.pk])
+
+
+class CIPack(models.Model):
+    """Model representing a pack of CIs
+
+    It is used to send CIs to production
+    """
+
+    responsible = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    sent_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    items = models.ManyToManyField(CI)
+    approved = models.BooleanField(default=False)
+
+    def send(self):
+        for ci in self.items.all():
+            ci.status = 1
+            ci.save()
+
+    def __str__(self):
+        return f"{self.responsible.client} | {self.responsible} | {self.sent_at}"

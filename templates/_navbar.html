@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="{% url 'cis:ci_list' %}" style="font-family: 'Dancing Script', cursive;">Internalize</a>
+  <a class="navbar-brand" href="{% url 'cis:homepage' %}" style="font-family: 'Dancing Script', cursive;">Internalize</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -12,11 +12,15 @@
           CIs
         </a>
         <div class="dropdown-menu" aria-labelledby="cisDropdown">
-          <a class="dropdown-item" href="{% url 'cis:ci_list' %}">All</a>
-          <a class="dropdown-item" href="{% url 'cis:ci_upload' %}">Upload</a>
+          <a class="dropdown-item" href="{% url 'cis:ci_list' 0 %}">Created</a>
+          <a class="dropdown-item" href="{% url 'cis:ci_list' 1 %}">Sent</a>
+          <a class="dropdown-item" href="{% url 'cis:ci_list' 2 %}">Approved</a>
         </div>
       </li>
-      {% if user.is_superuser or user.client %}
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'cis:ci_upload' %}">Upload</a>
+      </li>
+      {% if user.is_superuser or user.is_staff %}
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="clientsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Clients
