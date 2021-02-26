@@ -132,9 +132,9 @@ if DEBUG:
 
 AUTH_USER_MODEL = 'cis.User'
 
-LOGOUT_REDIRECT_URL = 'cis:ci_list'
+LOGOUT_REDIRECT_URL = 'cis:homepage'
 
-LOGIN_REDIRECT_URL = 'cis:ci_list'
+LOGIN_REDIRECT_URL = 'cis:homepage'
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-info',

@@ -93,6 +93,9 @@ class Appliance(models.Model):
     def __str__(self):
         return f"{self.manufacturer} | {self.model} | {self.serial_number}"
 
+    def get_absolute_url(self):
+        return reverse('cis:appliance_update', args=[self.pk])
+
 
 class Setup(models.Model):
     """Model representing a Setup applied to a Configuration Item"""
@@ -106,6 +109,9 @@ class Setup(models.Model):
     def __str__(self):
         return f"{self.hostname} | {self.ip} | {self.description}"
 
+    def get_absolute_url(self):
+        return reverse('cis:setup_update', args=[self.pk])
+
 
 class Credential(models.Model):
     """Model representing the credentials to log in a Configuration Item"""
@@ -117,6 +123,9 @@ class Credential(models.Model):
 
     def __str__(self):
         return f"{self.username}"
+
+    def get_absolute_url(self):
+        return reverse('cis:credential_update', args=[self.pk])
 
 
 class CI(models.Model):

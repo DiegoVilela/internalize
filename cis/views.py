@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
-from django.views.generic import ListView, DetailView, TemplateView
+from django.views.generic import ListView, DetailView, TemplateView, CreateView, UpdateView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 
-from .models import CI, Client, Manufacturer, Appliance, CIPack
+from .models import CI, Client, Manufacturer, Appliance, CIPack, Setup, Credential
 from .forms import UploadCIsForm
 from .loader import CILoader
 from .mixins import UserApprovedMixin
@@ -17,9 +17,21 @@ class HomePageView(TemplateView):
 class ClientListView(UserApprovedMixin, ListView):
     model = Client
 
+    def get_queryset(self):
+        pass
+
 
 class ClientDetailView(UserApprovedMixin, DetailView):
     model = Client
+
+    def get_context_data(self, **kwargs):
+        print(self.request)
+        return super().get_context_data(**kwargs)
+
+
+class CICreateView(UserApprovedMixin, CreateView):
+    model = CI
+    fields = ['appliances', 'setup', 'credential', 'site', 'contract']
 
 
 class CIListView(LoginRequiredMixin, ListView):
@@ -42,6 +54,36 @@ class ManufacturerDetailView(UserApprovedMixin, DetailView):
             manufacturer=context['manufacturer']
         ).count()
         return context
+
+
+class ApplianceCreateView(UserApprovedMixin, CreateView):
+    model = Appliance
+    fields = '__all__'
+
+
+class ApplianceUpdateView(UserApprovedMixin, UpdateView):
+    model = Appliance
+    fields = '__all__'
+
+
+class SetupCreateView(UserApprovedMixin, CreateView):
+    model = Setup
+    fields = '__all__'
+
+
+class SetupUpdateView(UserApprovedMixin, UpdateView):
+    model = Setup
+    fields = '__all__'
+
+
+class CredentialCreateView(UserApprovedMixin, CreateView):
+    model = Credential
+    fields = '__all__'
+
+
+class CredentialUpdateView(UserApprovedMixin, UpdateView):
+    model = Credential
+    fields = '__all__'
 
 
 @login_required
