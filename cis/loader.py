@@ -1,8 +1,7 @@
-from datetime import datetime
 from openpyxl import load_workbook
-from .models import Client, Site, CI, Appliance, Setup, Credential, Site, Contract, Manufacturer
+from .models import Client, Site, CI, Appliance, Site, Contract, Manufacturer
 from .cis_mapping import CLIENT, SETUP_HOSTNAME, SETUP_IP, SETUP_DESCRIPTION, \
-    SETUP_STATUS, SETUP_BUSINESS_IMPACT, SITE, SITE_DESCRIPTION, CONTRACT, \
+    SETUP_DEPLOYED, SETUP_BUSINESS_IMPACT, SITE, SITE_DESCRIPTION, CONTRACT, \
     CONTRACT_BEGIN, CONTRACT_END, CONTRACT_DESCRIPTION, CREDENTIAL_USERNAME, \
     CREDENTIAL_PASSWORD, CREDENTIAL_ENABLE_PASSWORD, CREDENTIAL_INSTRUCTIONS, \
     SUMMARY_SHEET, CIS_SHEET, APPLIANCES_SHEET, APPLIANCE_HOSTNAME, APPLIANCE_SERIAL_NUMBER, \
@@ -23,15 +22,21 @@ class CILoader:
         response = FileHandlerResponse(self.client)
         for row in cis_sheet.iter_rows(min_row=2, values_only=True):
             try:
-                setup = self._get_setup(row)
                 ci = CI.objects.create(
-                    setup=setup,
+                    hostname=row[SETUP_HOSTNAME],
+                    ip=row[SETUP_IP],
+                    description=row[SETUP_DESCRIPTION],
+                    deployed=bool(row[SETUP_DEPLOYED]),
+                    business_impact=row[SETUP_BUSINESS_IMPACT],
                     site=self._get_site(row),
                     contract=self._get_contract(row),
-                    credential=self._get_credential(row)
+                    username=row[CREDENTIAL_USERNAME],
+                    password=row[CREDENTIAL_PASSWORD],
+                    enable_password=row[CREDENTIAL_ENABLE_PASSWORD],
+                    instructions=row[CREDENTIAL_INSTRUCTIONS],
                 )
                 for appl_row in appliances_sheet.iter_rows(min_row=2, values_only=True):
-                    if appl_row[APPLIANCE_HOSTNAME] == setup.hostname:
+                    if appl_row[APPLIANCE_HOSTNAME] == row[SETUP_HOSTNAME]:
                         ci.appliances.add(self._get_appliance(appl_row))
 
                 response.count_ci()
@@ -44,17 +49,6 @@ class CILoader:
         name = summary_sheet[CLIENT].value
         self.client, created = Client.objects.get_or_create(name=name)
         return self.client
-
-    def _get_setup(self, row):
-        setup = Setup(
-            hostname=row[SETUP_HOSTNAME],
-            ip=row[SETUP_IP],
-            description=row[SETUP_DESCRIPTION],
-            status=row[SETUP_STATUS],
-            business_impact=row[SETUP_BUSINESS_IMPACT]
-        )
-        setup.save()
-        return setup
 
     def _get_site(self, row):
         if row[SITE] in self.sites:
@@ -78,16 +72,6 @@ class CILoader:
                 end=row[CONTRACT_END],
             )
             return self.contracts[row[CONTRACT]]
-
-    def _get_credential(self, row):
-        credential = Credential(
-            username=row[CREDENTIAL_USERNAME],
-            password=row[CREDENTIAL_PASSWORD],
-            enable_password=row[CREDENTIAL_ENABLE_PASSWORD],
-            instructions=row[CREDENTIAL_INSTRUCTIONS]
-        )
-        credential.save()
-        return credential
 
     def _get_appliance(self, row):
         appliance, created = Appliance.objects.get_or_create(

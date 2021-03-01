@@ -97,37 +97,6 @@ class Appliance(models.Model):
         return reverse('cis:appliance_update', args=[self.pk])
 
 
-class Setup(models.Model):
-    """Model representing a Setup applied to a Configuration Item"""
-
-    hostname = models.CharField(max_length=50, unique=True)
-    ip = models.GenericIPAddressField(unique=True)
-    description = models.CharField(max_length=255, unique=True)
-    status = models.CharField(max_length=100, default='deployed')
-    business_impact = models.CharField(max_length=10, default='low')
-
-    def __str__(self):
-        return f"{self.hostname} | {self.ip} | {self.description}"
-
-    def get_absolute_url(self):
-        return reverse('cis:setup_update', args=[self.pk])
-
-
-class Credential(models.Model):
-    """Model representing the credentials to log in a Configuration Item"""
-
-    username = models.CharField(max_length=50, blank=True, null=True)
-    password = models.CharField(max_length=50, blank=True, null=True)
-    enable_password = models.CharField(max_length=50, blank=True, null=True)
-    instructions = models.CharField(max_length=255, blank=True, null=True)
-
-    def __str__(self):
-        return f"{self.username}"
-
-    def get_absolute_url(self):
-        return reverse('cis:credential_update', args=[self.pk])
-
-
 class CI(models.Model):
     """Model representing a Configuration Item"""
 
@@ -137,14 +106,21 @@ class CI(models.Model):
         (2, 'APPROVED'),
     )
     appliances = models.ManyToManyField(Appliance)
-    setup = models.OneToOneField(Setup, on_delete=models.CASCADE, primary_key=True)
-    credential = models.OneToOneField(Credential, on_delete=models.SET_NULL, null=True)
     site = models.ForeignKey(Site, on_delete=models.SET_NULL, null=True)
+    hostname = models.CharField(max_length=50, unique=True)
+    ip = models.GenericIPAddressField(unique=True)
+    description = models.CharField(max_length=255, unique=True)
+    deployed = models.BooleanField(default=False)
+    business_impact = models.CharField(max_length=10, default='low')
     contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, null=True)
     status = models.PositiveSmallIntegerField(choices=STATUS_OPTIONS, default=0)
+    username = models.CharField(max_length=50, blank=True, null=True)
+    password = models.CharField(max_length=50, blank=True, null=True)
+    enable_password = models.CharField(max_length=50, blank=True, null=True)
+    instructions = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.site} | {self.setup}"
+        return f"{self.site} | {self.hostname} | {self.ip}"
 
     def get_absolute_url(self):
         return reverse('cis:ci_detail', args=[self.pk])

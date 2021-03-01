@@ -1,11 +1,10 @@
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView, TemplateView, CreateView, UpdateView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.forms import modelform_factory
 
-from .models import CI, Client, Manufacturer, Appliance, CIPack, Setup, Credential
+from .models import CI, Client, Manufacturer, Appliance, CIPack
 from .forms import UploadCIsForm
 from .loader import CILoader
 from .mixins import UserApprovedMixin
@@ -30,41 +29,9 @@ class ClientDetailView(UserApprovedMixin, DetailView):
         return super().get_context_data(**kwargs)
 
 
-def ci_create(request):
-    CIForm = modelform_factory(CI, exclude=['setup', 'credential', 'status'])
-    SetupForm = modelform_factory(Setup, fields='__all__')
-    CredentialForm = modelform_factory(Credential, fields='__all__')
-
-    if request.method == 'POST':
-        form_ci = CIForm(request.POST)
-        form_setup = SetupForm(request.POST)
-        form_credential = CredentialForm(request.POST)
-
-        if form_ci.is_valid() and form_setup.is_valid() and form_credential.is_valid():
-            ci = form_ci.save(commit=False)
-            ci.setup = form_setup.save()
-            ci.credential = form_credential.save()
-            ci.save()
-            # save appliances as it is a many-to-many relationship
-            # https://docs.djangoproject.com/en/3.1/topics/forms/modelforms/#the-save-method
-            form_ci.save_m2m()
-            return redirect(reverse('cis:ci_detail', args=[ci.pk]))
-        else:
-            return render(request, 'cis/ci_form.html', {
-                'form_ci': form_ci,
-                'form_setup': form_setup,
-                'form_credential': form_credential,
-            })
-    else:
-        form_ci = CIForm()
-        form_setup = SetupForm()
-        form_credential = CredentialForm()
-
-    return render(request, 'cis/ci_form.html', {
-        'form_ci': form_ci,
-        'form_setup': form_setup,
-        'form_credential': form_credential,
-    })
+class CICreateView(UserApprovedMixin, CreateView):
+    model = CI
+    fields = '__all__'
 
 
 class CIListView(LoginRequiredMixin, ListView):
@@ -96,26 +63,6 @@ class ApplianceCreateView(UserApprovedMixin, CreateView):
 
 class ApplianceUpdateView(UserApprovedMixin, UpdateView):
     model = Appliance
-    fields = '__all__'
-
-
-class SetupCreateView(UserApprovedMixin, CreateView):
-    model = Setup
-    fields = '__all__'
-
-
-class SetupUpdateView(UserApprovedMixin, UpdateView):
-    model = Setup
-    fields = '__all__'
-
-
-class CredentialCreateView(UserApprovedMixin, CreateView):
-    model = Credential
-    fields = '__all__'
-
-
-class CredentialUpdateView(UserApprovedMixin, UpdateView):
-    model = Credential
     fields = '__all__'
 
 

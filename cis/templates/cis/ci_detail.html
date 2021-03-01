@@ -1,6 +1,6 @@
 {% extends "base_generic.html" %}
 
-{% block title %}{{ ci.setup.hostname }}{% endblock %}
+{% block title %}{{ ci.hostname }}{% endblock %}
 
 {% block content %}
 <h1 class="h5 my-4">{{ ci }}</h1>
@@ -38,23 +38,23 @@
         <table class="table">
             <tr>
                 <th>Hostname</th>
-                <td>{{ ci.setup.hostname }}</td>
+                <td>{{ ci.hostname }}</td>
             </tr>
             <tr>
                 <th>IP</th>
-                <td>{{ ci.setup.ip }}</td>
+                <td>{{ ci.ip }}</td>
             </tr>
             <tr>
                 <th>Description</th>
-                <td>{{ ci.setup.description }}</td>
+                <td>{{ ci.description }}</td>
             </tr>
             <tr>
-                <th>Status</th>
-                <td>{{ ci.setup.status }}</td>
+                <th>Deployed</th>
+                <td>{{ ci.status }}</td>
             </tr>
             <tr>
                 <th>Business Impact</th>
-                <td>{{ ci.setup.business_impact }}</td>
+                <td>{{ ci.business_impact }}</td>
             </tr>
         </table>
     </div>
@@ -87,19 +87,19 @@
         <table class="table">
             <tr>
                 <th>Username</th>
-                <td>{{ ci.credential.username }}</td>
+                <td>{{ ci.username }}</td>
             </tr>
             <tr>
                 <th>Password</th>
-                <td>{{ ci.credential.password }}</td>
+                <td>{{ ci.password }}</td>
             </tr>
             <tr>
                 <th>Enable Password</th>
-                <td>{{ ci.credential.enable_password }}</td>
+                <td>{{ ci.enable_password }}</td>
             </tr>
             <tr>
                 <th>Instructions</th>
-                <td>{{ ci.credential.instructions }}</td>
+                <td>{{ ci.instructions }}</td>
             </tr>
         </table>
     </div>

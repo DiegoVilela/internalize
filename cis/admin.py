@@ -4,7 +4,7 @@ from django.utils.translation import gettext, gettext_lazy as _
 
 from .models import (
     User, Client, Site, ISP, Circuit,
-    CI, Manufacturer, Appliance, Setup, Contract, Credential, CIPack
+    CI, Manufacturer, Appliance, Contract, CIPack
 )
 
 
@@ -28,7 +28,5 @@ admin.site.register(Manufacturer)
 admin.site.register(Circuit)
 admin.site.register(Contract)
 admin.site.register(Appliance)
-admin.site.register(Setup)
-admin.site.register(Credential)
 admin.site.register(CI)
 admin.site.register(CIPack)
