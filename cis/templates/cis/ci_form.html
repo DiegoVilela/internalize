@@ -7,7 +7,9 @@
 
 <form method="post">
   {% csrf_token %}
-  {{ form.as_p }}
+  {{ form_setup.as_p }}
+  {{ form_ci.as_p }}
+  {{ form_credential.as_p }}
   <input type="submit" value="Save">
 </form>
 
