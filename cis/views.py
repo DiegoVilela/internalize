@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 
 from .models import CI, Client, Manufacturer, Appliance, CIPack
-from .forms import UploadCIsForm
+from .forms import UploadCIsForm, CIForm
 from .loader import CILoader
 from .mixins import UserApprovedMixin
 
@@ -28,7 +28,12 @@ class ClientDetailView(UserApprovedMixin, DetailView):
 
 class CICreateView(UserApprovedMixin, CreateView):
     model = CI
-    fields = '__all__'
+    form_class = CIForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'client': self.request.user.client })
+        return kwargs
 
 
 class CIListView(LoginRequiredMixin, ListView):
