@@ -13,6 +13,7 @@ urlpatterns = [
     path('clients/', views.ClientListView.as_view(), name='client_list'),
     path('client/<int:pk>', views.ClientDetailView.as_view(), name='client_detail'),
     path('manufacturer/<int:pk>', views.ManufacturerDetailView.as_view(), name='manufacturer_detail'),
+    path('appliances/', views.ApplianceListView.as_view(), name='appliance_list'),
     path('appliance/create/', views.ApplianceCreateView.as_view(), name='appliance_create'),
     path('appliance/<int:pk>', views.ApplianceUpdateView.as_view(), name='appliance_update'),
 ]

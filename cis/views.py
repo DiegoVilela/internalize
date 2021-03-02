@@ -17,9 +17,6 @@ class HomePageView(TemplateView):
 class ClientListView(UserApprovedMixin, ListView):
     model = Client
 
-    def get_queryset(self):
-        pass
-
 
 class ClientDetailView(UserApprovedMixin, DetailView):
     model = Client
@@ -54,6 +51,13 @@ class ManufacturerDetailView(UserApprovedMixin, DetailView):
             manufacturer=context['manufacturer']
         ).count()
         return context
+
+
+class ApplianceListView(UserApprovedMixin, ListView):
+    model = Appliance
+
+    def get_queryset(self):
+        return Appliance.objects.filter(ci__site__client=self.request.user.client)
 
 
 class ApplianceCreateView(UserApprovedMixin, CreateView):

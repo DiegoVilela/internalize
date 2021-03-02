@@ -12,9 +12,20 @@
           CIs
         </a>
         <div class="dropdown-menu" aria-labelledby="cisDropdown">
+          <a class="dropdown-item" href="{% url 'cis:ci_create' %}">Add</a>
+          <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="{% url 'cis:ci_list' 0 %}">Created</a>
           <a class="dropdown-item" href="{% url 'cis:ci_list' 1 %}">Sent</a>
           <a class="dropdown-item" href="{% url 'cis:ci_list' 2 %}">Approved</a>
+        </div>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="appliancesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Appliances
+        </a>
+        <div class="dropdown-menu" aria-labelledby="appliancesDropdown">
+          <a class="dropdown-item" href="{% url 'cis:appliance_create' %}">Add</a>
+          <a class="dropdown-item" href="{% url 'cis:appliance_list' %}">All</a>
         </div>
       </li>
       <li class="nav-item">
