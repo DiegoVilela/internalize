@@ -3,9 +3,10 @@ from django.views.generic import ListView, DetailView, TemplateView, CreateView,
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.http import Http404
 
 from .models import CI, Client, Manufacturer, Appliance, CIPack
-from .forms import UploadCIsForm, CIForm
+from .forms import UploadCIsForm, CIForm, ApplianceForm
 from .loader import CILoader
 from .mixins import UserApprovedMixin
 
@@ -30,21 +31,35 @@ class CICreateView(UserApprovedMixin, CreateView):
     model = CI
     form_class = CIForm
 
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        return super().post(request, *args, **kwargs)
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
+        # only sites of the user.client will be shown
         kwargs.update({'client': self.request.user.client })
         return kwargs
 
 
-class CIListView(LoginRequiredMixin, ListView):
+class CIListView(UserApprovedMixin, ListView):
     model = CI
 
     def get_queryset(self):
-        return CI.objects.filter(status=self.kwargs['status'])
+        return CI.objects.filter(
+            status=self.kwargs['status'],
+            site__client=self.request.user.client
+        )
 
 
 class CIDetailView(UserApprovedMixin, DetailView):
     model = CI
+
+    def get_object(self, **kwargs):
+        object = super().get_object(**kwargs)
+        if object.site.client != self.request.user.client:
+            raise Http404
+        return object
 
 
 class ManufacturerDetailView(UserApprovedMixin, DetailView):
@@ -62,17 +77,21 @@ class ApplianceListView(UserApprovedMixin, ListView):
     model = Appliance
 
     def get_queryset(self):
-        return Appliance.objects.filter(ci__site__client=self.request.user.client)
+        return Appliance.objects.filter(client=self.request.user.client)
 
 
 class ApplianceCreateView(UserApprovedMixin, CreateView):
     model = Appliance
-    fields = '__all__'
+    form_class = ApplianceForm
+
+    def form_valid(self, form):
+        form.instance.client = self.request.user.client
+        return super().form_valid(form)
 
 
 class ApplianceUpdateView(UserApprovedMixin, UpdateView):
     model = Appliance
-    fields = '__all__'
+    form_class = ApplianceForm
 
 
 @login_required

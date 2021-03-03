@@ -85,6 +85,7 @@ class Contract(models.Model):
 class Appliance(models.Model):
     """Model representing a physical or virtual Appliance that compounds a Configuration Item"""
 
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
     serial_number = models.CharField(max_length=255, unique=True)
     manufacturer = models.ForeignKey(Manufacturer, on_delete=models.SET_NULL, null=True)
     model = models.CharField(max_length=100)
@@ -105,6 +106,7 @@ class CI(models.Model):
         (1, 'SENT'),
         (2, 'APPROVED'),
     )
+    # todo constrains Client vs Unique fields
     appliances = models.ManyToManyField(Appliance)
     site = models.ForeignKey(Site, on_delete=models.SET_NULL, null=True)
     hostname = models.CharField(max_length=50, unique=True)

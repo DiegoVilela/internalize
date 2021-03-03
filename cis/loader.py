@@ -75,6 +75,7 @@ class CILoader:
 
     def _get_appliance(self, row):
         appliance, created = Appliance.objects.get_or_create(
+            client=self.client,
             serial_number=row[APPLIANCE_SERIAL_NUMBER],
             manufacturer=self._get_manufacturer(row[APPLIANCE_MANUFACTURER]),
             model=row[APPLIANCE_MODEL],

@@ -14,17 +14,25 @@ class UploadCIsForm(forms.Form):
 
 
 class CIForm(forms.ModelForm):
+    appliances = forms.ModelMultipleChoiceField(queryset=None)
+    site = forms.ModelChoiceField(queryset=None)
 
     def __init__(self, *args, **kwargs):
         self.client = kwargs.pop('client')
-        self.base_fields['appliances'] = forms.ModelMultipleChoiceField(
-            queryset=Appliance.objects.filter(ci__site__client=self.client)
+        super().__init__(*args, **kwargs)
+        self.fields['appliances'] = forms.ModelMultipleChoiceField(
+            queryset=Appliance.objects.filter(client=self.client)
         )
-        self.base_fields['site'] = forms.ModelChoiceField(
+        self.fields['site'] = forms.ModelChoiceField(
             queryset=Site.objects.filter(client=self.client)
         )
-        super().__init__(*args, **kwargs)
 
     class Meta:
         model = CI
         exclude = ('status',)
+
+
+class ApplianceForm(forms.ModelForm):
+    class Meta:
+        model = Appliance
+        exclude = ('client',)
