@@ -29,7 +29,7 @@ class CIForm(forms.ModelForm):
 
     class Meta:
         model = CI
-        exclude = ('status',)
+        exclude = ('client', 'status')
 
 
 class ApplianceForm(forms.ModelForm):

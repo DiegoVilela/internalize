@@ -23,6 +23,7 @@ class CILoader:
         for row in cis_sheet.iter_rows(min_row=2, values_only=True):
             try:
                 ci = CI.objects.create(
+                    client=self.client,
                     hostname=row[SETUP_HOSTNAME],
                     ip=row[SETUP_IP],
                     description=row[SETUP_DESCRIPTION],

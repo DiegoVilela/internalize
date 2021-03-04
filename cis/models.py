@@ -47,6 +47,9 @@ class Site(models.Model):
     def __str__(self):
         return f"{self.client} | {self.name}"
 
+    def get_absolute_url(self):
+        return reverse('cis:site_update', args=[self.pk])
+
 
 class ISP(Company):
     """Model representing a Internet Service Provider company"""
@@ -106,12 +109,12 @@ class CI(models.Model):
         (1, 'SENT'),
         (2, 'APPROVED'),
     )
-    # todo constrains Client vs Unique fields
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
     appliances = models.ManyToManyField(Appliance)
-    site = models.ForeignKey(Site, on_delete=models.SET_NULL, null=True)
-    hostname = models.CharField(max_length=50, unique=True)
-    ip = models.GenericIPAddressField(unique=True)
-    description = models.CharField(max_length=255, unique=True)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    hostname = models.CharField(max_length=50)
+    ip = models.GenericIPAddressField()
+    description = models.CharField(max_length=255)
     deployed = models.BooleanField(default=False)
     business_impact = models.CharField(max_length=10, default='low')
     contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, null=True)
@@ -126,6 +129,14 @@ class CI(models.Model):
 
     def get_absolute_url(self):
         return reverse('cis:ci_detail', args=[self.pk])
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['client', 'hostname', 'ip', 'description'],
+                name='unique_client_hostname_ip_description'
+            )
+        ]
 
 
 class CIPack(models.Model):

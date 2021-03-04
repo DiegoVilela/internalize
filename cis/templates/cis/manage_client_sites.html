@@ -1,0 +1,17 @@
+{% extends "base_generic.html" %}
+
+{% block title %}{{ client }}{% endblock %}
+
+{% block content %}
+<h1 class="h5 my-4">{{ client }}</h1>
+
+<h2 class="h5 my-4">Sites</h2>
+<form method="post" class="mb-5">
+    {% csrf_token %}
+    <table class="table">
+        {{ formset }}
+    </table>
+    <input type="submit" value="Save" class="btn btn-primary">
+</form>
+
+{% endblock %}

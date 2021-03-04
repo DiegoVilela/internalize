@@ -28,6 +28,15 @@
           <a class="dropdown-item" href="{% url 'cis:appliance_list' %}">All</a>
         </div>
       </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="sitesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Sites
+        </a>
+        <div class="dropdown-menu" aria-labelledby="sitesDropdown">
+          <a class="dropdown-item" href="{% url 'cis:site_create' %}">Add</a>
+          <a class="dropdown-item" href="{% url 'cis:manage_client_sites' %}">All</a>
+        </div>
+      </li>
       <li class="nav-item">
         <a class="nav-link" href="{% url 'cis:ci_upload' %}">Upload</a>
       </li>

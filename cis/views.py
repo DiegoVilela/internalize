@@ -1,43 +1,62 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.views.generic import ListView, DetailView, TemplateView, CreateView, UpdateView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.http import Http404
+from django.forms import inlineformset_factory
 
-from .models import CI, Client, Manufacturer, Appliance, CIPack
+from .models import CI, Client, Site, Manufacturer, Appliance, CIPack
 from .forms import UploadCIsForm, CIForm, ApplianceForm
 from .loader import CILoader
-from .mixins import UserApprovedMixin
+from .mixins import UserApprovedMixin, AddClientMixin
 
 
 class HomePageView(TemplateView):
     template_name = 'cis/homepage.html'
 
 
-class ClientListView(UserApprovedMixin, ListView):
-    model = Client
+class SiteCreateView(UserApprovedMixin, AddClientMixin, CreateView):
+    model = Site
+    fields = ('name', 'description')
 
 
-class ClientDetailView(UserApprovedMixin, DetailView):
-    model = Client
-
-    def get_context_data(self, **kwargs):
-        print(self.request)
-        return super().get_context_data(**kwargs)
+class SiteUpdateView(UserApprovedMixin, UpdateView):
+    model = Site
+    fields = ('name', 'description')
 
 
-class CICreateView(UserApprovedMixin, CreateView):
+def manage_client_sites(request):
+    if not request.user.is_approved:
+        messages.warning(request, 'Your account needs to be approved. Please contact you Account Manager.')
+        return redirect('cis:homepage')
+
+    client = request.user.client
+    SiteInlineFormSet = inlineformset_factory(
+        Client, Site,
+        fields=('name', 'description'),
+        extra=0,
+    )
+    if request.method == 'POST':
+        formset = SiteInlineFormSet(request.POST, instance=client)
+        if formset.is_valid():
+            formset.save()
+            return redirect(reverse('cis:manage_client_sites'))
+    else:
+        formset = SiteInlineFormSet(instance=client)
+        return render(request, 'cis/manage_client_sites.html', {
+            'formset': formset,
+            'client': client,
+        })
+
+
+class CICreateView(UserApprovedMixin, AddClientMixin, CreateView):
     model = CI
     form_class = CIForm
 
-    def post(self, request, *args, **kwargs):
-        self.object = None
-        return super().post(request, *args, **kwargs)
-
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # only sites of the user.client will be shown
+        # only sites of the user.client will be shown in the form
         kwargs.update({'client': self.request.user.client })
         return kwargs
 
@@ -80,13 +99,9 @@ class ApplianceListView(UserApprovedMixin, ListView):
         return Appliance.objects.filter(client=self.request.user.client)
 
 
-class ApplianceCreateView(UserApprovedMixin, CreateView):
+class ApplianceCreateView(UserApprovedMixin, AddClientMixin, CreateView):
     model = Appliance
     form_class = ApplianceForm
-
-    def form_valid(self, form):
-        form.instance.client = self.request.user.client
-        return super().form_valid(form)
 
 
 class ApplianceUpdateView(UserApprovedMixin, UpdateView):
