@@ -102,22 +102,19 @@ class Appliance(models.Model):
 
 
 class Credential(models.Model):
-    """Model representing access credentials of a Configuration Item's setup"""
+    """Model representing access credentials of a Configuration Item"""
 
+    credential_id = models.AutoField(primary_key=True)
     username = models.CharField(max_length=50)
     password = models.CharField(max_length=50)
     enable_password = models.CharField(max_length=50)
     instructions = models.CharField(max_length=255, blank=True, null=True)
 
 
-class Setup(Credential):
-    """
-    Model representing a setup of a Configuration Item.
+class Setup(models.Model):
+    """Model representing a setup of a Configuration Item."""
 
-    An example of multi-table-inheritance.
-    https://docs.djangoproject.com/en/3.2/topics/db/models/#multi-table-inheritance
-    """
-
+    setup_id = models.AutoField(primary_key=True)
     hostname = models.CharField(max_length=50)
     ip = models.GenericIPAddressField()
     description = models.CharField(max_length=255)
@@ -125,11 +122,12 @@ class Setup(Credential):
     business_impact = models.CharField(max_length=10, default='low')
 
 
-class CI(Setup):
+class CI(Setup, Credential):
     """
     Model representing a Configuration Item.
 
-    It is composed of a Setup, which in its turn is composed of a Credential.
+    It is composed of a Setup and a Credential.
+    https://docs.djangoproject.com/en/stable/topics/db/models/#multiple-inheritance
     """
 
     STATUS_OPTIONS = (
@@ -149,13 +147,13 @@ class CI(Setup):
     def get_absolute_url(self):
         return reverse('cis:ci_detail', args=[self.pk])
 
-    # class Meta:
-    #     constraints = [
-    #         models.UniqueConstraint(
-    #             fields=['client', 'setup'],
-    #             name='unique_client_hostname_ip_description'
-    #         )
-    #     ]
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['client', 'setup_ptr_id', 'credential_ptr_id'],
+                name='unique_client_setup_credential'
+            )
+        ]
 
 
 class CIPack(models.Model):
