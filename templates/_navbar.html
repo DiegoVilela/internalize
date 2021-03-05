@@ -40,16 +40,6 @@
       <li class="nav-item">
         <a class="nav-link" href="{% url 'cis:ci_upload' %}">Upload</a>
       </li>
-      {% if user.is_superuser or user.is_staff %}
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="clientsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Clients
-        </a>
-        <div class="dropdown-menu" aria-labelledby="clientsDropdown">
-          <a class="dropdown-item" href="{% url 'cis:client_list' %}">All</a>
-        </div>
-      </li>
-      {% endif %}
     </ul>
     {% endif %}
 

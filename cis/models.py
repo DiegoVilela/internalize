@@ -101,8 +101,36 @@ class Appliance(models.Model):
         return reverse('cis:appliance_update', args=[self.pk])
 
 
-class CI(models.Model):
-    """Model representing a Configuration Item"""
+class Credential(models.Model):
+    """Model representing access credentials of a Configuration Item's setup"""
+
+    username = models.CharField(max_length=50)
+    password = models.CharField(max_length=50)
+    enable_password = models.CharField(max_length=50)
+    instructions = models.CharField(max_length=255, blank=True, null=True)
+
+
+class Setup(Credential):
+    """
+    Model representing a setup of a Configuration Item.
+
+    An example of multi-table-inheritance.
+    https://docs.djangoproject.com/en/3.2/topics/db/models/#multi-table-inheritance
+    """
+
+    hostname = models.CharField(max_length=50)
+    ip = models.GenericIPAddressField()
+    description = models.CharField(max_length=255)
+    deployed = models.BooleanField(default=False)
+    business_impact = models.CharField(max_length=10, default='low')
+
+
+class CI(Setup):
+    """
+    Model representing a Configuration Item.
+
+    It is composed of a Setup, which in its turn is composed of a Credential.
+    """
 
     STATUS_OPTIONS = (
         (0, 'CREATED'),
@@ -110,19 +138,10 @@ class CI(models.Model):
         (2, 'APPROVED'),
     )
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    appliances = models.ManyToManyField(Appliance)
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
-    hostname = models.CharField(max_length=50)
-    ip = models.GenericIPAddressField()
-    description = models.CharField(max_length=255)
-    deployed = models.BooleanField(default=False)
-    business_impact = models.CharField(max_length=10, default='low')
+    appliances = models.ManyToManyField(Appliance)
     contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, null=True)
     status = models.PositiveSmallIntegerField(choices=STATUS_OPTIONS, default=0)
-    username = models.CharField(max_length=50, blank=True, null=True)
-    password = models.CharField(max_length=50, blank=True, null=True)
-    enable_password = models.CharField(max_length=50, blank=True, null=True)
-    instructions = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"{self.site} | {self.hostname} | {self.ip}"
@@ -130,13 +149,13 @@ class CI(models.Model):
     def get_absolute_url(self):
         return reverse('cis:ci_detail', args=[self.pk])
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['client', 'hostname', 'ip', 'description'],
-                name='unique_client_hostname_ip_description'
-            )
-        ]
+    # class Meta:
+    #     constraints = [
+    #         models.UniqueConstraint(
+    #             fields=['client', 'setup'],
+    #             name='unique_client_hostname_ip_description'
+    #         )
+    #     ]
 
 
 class CIPack(models.Model):
