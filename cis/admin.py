@@ -10,6 +10,7 @@ from .models import (
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
+    list_select_related = ('client',)
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         (_('Client'), {'fields': ('client',)}),

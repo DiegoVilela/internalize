@@ -24,6 +24,7 @@ class SiteCreateView(UserApprovedMixin, AddClientMixin, CreateView):
 class SiteUpdateView(UserApprovedMixin, UpdateView):
     model = Site
     fields = ('name', 'description')
+    queryset = Site.objects.select_related('client')
 
 
 def manage_client_sites(request):
@@ -65,7 +66,7 @@ class CIListView(UserApprovedMixin, ListView):
     model = CI
 
     def get_queryset(self):
-        return CI.objects.filter(
+        return CI.objects.select_related().filter(
             status=self.kwargs['status'],
             site__client=self.request.user.client
         )
@@ -73,11 +74,14 @@ class CIListView(UserApprovedMixin, ListView):
 
 class CIDetailView(UserApprovedMixin, DetailView):
     model = CI
+    queryset = CI.objects.select_related()
 
     def get_object(self, **kwargs):
         object = super().get_object(**kwargs)
         if object.site.client != self.request.user.client:
+            # user authenticated but unauthorized
             raise Http404
+        # user authenticated and authorized
         return object
 
 
@@ -96,7 +100,9 @@ class ApplianceListView(UserApprovedMixin, ListView):
     model = Appliance
 
     def get_queryset(self):
-        return Appliance.objects.filter(client=self.request.user.client)
+        return Appliance.objects.select_related(
+            'client', 'manufacturer'
+        ).filter(client=self.request.user.client)
 
 
 class ApplianceCreateView(UserApprovedMixin, AddClientMixin, CreateView):
@@ -107,6 +113,7 @@ class ApplianceCreateView(UserApprovedMixin, AddClientMixin, CreateView):
 class ApplianceUpdateView(UserApprovedMixin, UpdateView):
     model = Appliance
     form_class = ApplianceForm
+    queryset = Appliance.objects.select_related('client', 'manufacturer')
 
 
 @login_required
