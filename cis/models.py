@@ -1,10 +1,18 @@
 from django.db import models
 from django.urls import reverse
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
+
+
+class UserClientManager(UserManager):
+    def get_queryset(self):
+        return super().get_queryset().select_related('client')
 
 
 class User(AbstractUser):
     client = models.OneToOneField('Client', on_delete=models.CASCADE, blank=True, null=True)
+    # modify the user manager's initial QuerySet to join the Client
+    # https://docs.djangoproject.com/en/3.1/topics/db/managers/#modifying-a-manager-s-initial-queryset
+    objects = UserClientManager()
 
     @property
     def is_approved(self):
