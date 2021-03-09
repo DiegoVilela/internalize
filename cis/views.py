@@ -66,7 +66,7 @@ class CIListView(UserApprovedMixin, ListView):
     model = CI
 
     def get_queryset(self):
-        return CI.objects.select_related().filter(
+        return CI.objects.filter(
             status=self.kwargs['status'],
             site__client=self.request.user.client
         )
@@ -74,7 +74,7 @@ class CIListView(UserApprovedMixin, ListView):
 
 class CIDetailView(UserApprovedMixin, DetailView):
     model = CI
-    queryset = CI.objects.select_related()
+    queryset = CI.objects.select_related('site', 'contract')
 
     def get_object(self, **kwargs):
         object = super().get_object(**kwargs)
@@ -100,9 +100,7 @@ class ApplianceListView(UserApprovedMixin, ListView):
     model = Appliance
 
     def get_queryset(self):
-        return Appliance.objects.select_related(
-            'client', 'manufacturer'
-        ).filter(client=self.request.user.client)
+        return Appliance.objects.filter(client=self.request.user.client)
 
 
 class ApplianceCreateView(UserApprovedMixin, AddClientMixin, CreateView):

@@ -93,8 +93,16 @@ class Contract(models.Model):
         return self.name
 
 
+class ApplianceManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related('manufacturer')
+
+
 class Appliance(models.Model):
     """Model representing a physical or virtual Appliance that compounds a Configuration Item"""
+
+    # modify the initial queryset to join the Manufacturer
+    objects = ApplianceManager()
 
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     serial_number = models.CharField(max_length=255, unique=True)
