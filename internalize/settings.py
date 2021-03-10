@@ -52,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'cis.middleware.ClientAuthorizationMiddleware',
 ]
 
 ROOT_URLCONF = 'internalize.urls'
@@ -134,9 +135,9 @@ if DEBUG:
 
 AUTH_USER_MODEL = 'cis.User'
 
-LOGOUT_REDIRECT_URL = 'cis:homepage'
+LOGOUT_REDIRECT_URL = 'homepage'
 
-LOGIN_REDIRECT_URL = 'cis:homepage'
+LOGIN_REDIRECT_URL = 'homepage'
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-info',

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, reverse
-from django.views.generic import ListView, DetailView, TemplateView, CreateView, UpdateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
@@ -9,29 +9,30 @@ from django.forms import inlineformset_factory
 from .models import CI, Client, Site, Manufacturer, Appliance, CIPack
 from .forms import UploadCIsForm, CIForm, ApplianceForm
 from .loader import CILoader
-from .mixins import UserApprovedMixin, AddClientMixin
+from .mixins import AddClientMixin
 
 
-class HomePageView(TemplateView):
-    template_name = 'cis/homepage.html'
+def homepage(request):
+    user = request.user
+    if user.is_authenticated:
+        if not user.is_approved:
+            messages.warning(request, 'Your account needs to be approved. '
+                                      'Please contact you Account Manager.')
+    return render(request, 'homepage.html')
 
 
-class SiteCreateView(UserApprovedMixin, AddClientMixin, CreateView):
+class SiteCreateView(AddClientMixin, CreateView):
     model = Site
     fields = ('name', 'description')
 
 
-class SiteUpdateView(UserApprovedMixin, UpdateView):
+class SiteUpdateView(UpdateView):
     model = Site
     fields = ('name', 'description')
     queryset = Site.objects.select_related('client')
 
 
 def manage_client_sites(request):
-    if not request.user.is_approved:
-        messages.warning(request, 'Your account needs to be approved. Please contact you Account Manager.')
-        return redirect('cis:homepage')
-
     client = request.user.client
     SiteInlineFormSet = inlineformset_factory(
         Client, Site,
@@ -51,7 +52,7 @@ def manage_client_sites(request):
         })
 
 
-class CICreateView(UserApprovedMixin, AddClientMixin, CreateView):
+class CICreateView(AddClientMixin, CreateView):
     model = CI
     form_class = CIForm
 
@@ -62,7 +63,7 @@ class CICreateView(UserApprovedMixin, AddClientMixin, CreateView):
         return kwargs
 
 
-class CIListView(UserApprovedMixin, ListView):
+class CIListView(ListView):
     model = CI
 
     def get_queryset(self):
@@ -72,7 +73,7 @@ class CIListView(UserApprovedMixin, ListView):
         )
 
 
-class CIDetailView(UserApprovedMixin, DetailView):
+class CIDetailView(DetailView):
     model = CI
     queryset = CI.objects.select_related('site', 'contract')
 
@@ -85,7 +86,7 @@ class CIDetailView(UserApprovedMixin, DetailView):
         return object
 
 
-class ManufacturerDetailView(UserApprovedMixin, DetailView):
+class ManufacturerDetailView(DetailView):
     model = Manufacturer
 
     def get_context_data(self, **kwargs):
@@ -96,19 +97,19 @@ class ManufacturerDetailView(UserApprovedMixin, DetailView):
         return context
 
 
-class ApplianceListView(UserApprovedMixin, ListView):
+class ApplianceListView(ListView):
     model = Appliance
 
     def get_queryset(self):
         return Appliance.objects.filter(client=self.request.user.client)
 
 
-class ApplianceCreateView(UserApprovedMixin, AddClientMixin, CreateView):
+class ApplianceCreateView(AddClientMixin, CreateView):
     model = Appliance
     form_class = ApplianceForm
 
 
-class ApplianceUpdateView(UserApprovedMixin, UpdateView):
+class ApplianceUpdateView(UpdateView):
     model = Appliance
     form_class = ApplianceForm
     queryset = Appliance.objects.select_related('client', 'manufacturer')
@@ -116,10 +117,6 @@ class ApplianceUpdateView(UserApprovedMixin, UpdateView):
 
 @login_required
 def ci_upload(request):
-    if not request.user.is_approved:
-        messages.warning(request, 'Your account needs to be approved. Please contact you Account Manager.')
-        return redirect('cis:homepage')
-
     result = None
 
     if request.method == 'POST':
@@ -138,10 +135,6 @@ def ci_upload(request):
 
 @login_required
 def send_ci_pack(request):
-    if not request.user.is_approved:
-        messages.warning(request, 'Your account needs to be approved. Please contact you Account Manager.')
-        return redirect('cis:homepage')
-
     if request.method == 'POST':
         pack = CIPack(responsible=request.user)
         pack.save()
@@ -151,4 +144,4 @@ def send_ci_pack(request):
             pack.send()
             messages.success(request, 'Pack created.')
 
-    return render(request, 'cis/homepage.html')
+    return render(request, 'homepage.html')

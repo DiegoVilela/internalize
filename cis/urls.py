@@ -4,7 +4,6 @@ from . import views
 app_name = 'cis'
 
 urlpatterns = [
-    path('', views.HomePageView.as_view(), name='homepage'),
     path('cis/<status>/', views.CIListView.as_view(), name='ci_list'),
     path('ci/create/', views.CICreateView.as_view(), name='ci_create'),
     path('ci/upload/', views.ci_upload, name='ci_upload'),
