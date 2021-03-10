@@ -1,4 +1,5 @@
 from openpyxl import load_workbook
+from django.db import IntegrityError, transaction
 from .models import Client, Site, CI, Appliance, Site, Contract, Manufacturer
 from .cis_mapping import CLIENT, SETUP_HOSTNAME, SETUP_IP, SETUP_DESCRIPTION, \
     SETUP_DEPLOYED, SETUP_BUSINESS_IMPACT, SITE, SITE_DESCRIPTION, CONTRACT, \
@@ -18,32 +19,41 @@ class CILoader:
 
     def save(self):
         cis_sheet = self._workbook[CIS_SHEET]
-        appliances_sheet = self._workbook[APPLIANCES_SHEET]
+
         response = FileHandlerResponse(self.client)
         for row in cis_sheet.iter_rows(min_row=2, values_only=True):
             try:
-                ci = CI.objects.create(
-                    client=self.client,
-                    hostname=row[SETUP_HOSTNAME],
-                    ip=row[SETUP_IP],
-                    description=row[SETUP_DESCRIPTION],
-                    deployed=bool(row[SETUP_DEPLOYED]),
-                    business_impact=row[SETUP_BUSINESS_IMPACT],
-                    site=self._get_site(row),
-                    contract=self._get_contract(row),
-                    username=row[CREDENTIAL_USERNAME],
-                    password=row[CREDENTIAL_PASSWORD],
-                    enable_password=row[CREDENTIAL_ENABLE_PASSWORD],
-                    instructions=row[CREDENTIAL_INSTRUCTIONS],
-                )
-                for appl_row in appliances_sheet.iter_rows(min_row=2, values_only=True):
-                    if appl_row[APPLIANCE_HOSTNAME] == row[SETUP_HOSTNAME]:
-                        ci.appliances.add(self._get_appliance(appl_row))
-
+                with transaction.atomic():
+                    ci = self._create_ci(row)
+                    ci.appliances.set(self._get_ci_appliances(ci, row))
                 response.count_ci()
-            except Exception as e:
+            except IntegrityError as e:
                 response.add_error({'exception': e, 'row': row})
         return response
+
+    def _create_ci(self, row):
+        return CI.objects.create(
+            client=self.client,
+            hostname=row[SETUP_HOSTNAME],
+            ip=row[SETUP_IP],
+            description=row[SETUP_DESCRIPTION],
+            deployed=bool(row[SETUP_DEPLOYED]),
+            business_impact=row[SETUP_BUSINESS_IMPACT],
+            site=self._get_site(row),
+            contract=self._get_contract(row),
+            username=row[CREDENTIAL_USERNAME],
+            password=row[CREDENTIAL_PASSWORD],
+            enable_password=row[CREDENTIAL_ENABLE_PASSWORD],
+            instructions=row[CREDENTIAL_INSTRUCTIONS],
+        )
+
+    def _get_ci_appliances(self, ci, row):
+        appliances = set()
+        appliances_sheet = self._workbook[APPLIANCES_SHEET]
+        for appl_row in appliances_sheet.iter_rows(min_row=2, values_only=True):
+            if appl_row[APPLIANCE_HOSTNAME] == row[SETUP_HOSTNAME]:
+                appliances.add(self._get_appliance(appl_row))
+        return appliances
 
     def _get_client(self):
         summary_sheet = self._workbook[SUMMARY_SHEET]

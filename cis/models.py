@@ -16,7 +16,7 @@ class User(AbstractUser):
 
     @property
     def is_approved(self):
-        return self.client or self.is_superuser
+        return bool(self.client) or self.is_superuser
 
 
 class Company(models.Model):
@@ -127,18 +127,7 @@ class Credential(models.Model):
     instructions = models.CharField(max_length=255, blank=True, null=True)
 
 
-class Setup(models.Model):
-    """Model representing a setup of a Configuration Item."""
-
-    setup_id = models.AutoField(primary_key=True)
-    hostname = models.CharField(max_length=50)
-    ip = models.GenericIPAddressField()
-    description = models.CharField(max_length=255)
-    deployed = models.BooleanField(default=False)
-    business_impact = models.CharField(max_length=10, default='low')
-
-
-class CI(Setup, Credential):
+class CI(Credential):
     """
     Model representing a Configuration Item.
 
@@ -154,6 +143,11 @@ class CI(Setup, Credential):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
     appliances = models.ManyToManyField(Appliance)
+    hostname = models.CharField(max_length=50)
+    ip = models.GenericIPAddressField()
+    description = models.CharField(max_length=255)
+    deployed = models.BooleanField(default=False)
+    business_impact = models.CharField(max_length=10, default='low')
     contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, null=True)
     status = models.PositiveSmallIntegerField(choices=STATUS_OPTIONS, default=0)
 
@@ -166,8 +160,8 @@ class CI(Setup, Credential):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['client', 'setup_ptr_id', 'credential_ptr_id'],
-                name='unique_client_setup_credential'
+                fields=['client', 'hostname', 'ip', 'description'],
+                name='unique_client_hostname_ip_description'
             )
         ]
 

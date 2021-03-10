@@ -1,12 +1,12 @@
-from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 
-class UserApprovedMixin(LoginRequiredMixin, UserPassesTestMixin):
+class UserApprovedMixin(UserPassesTestMixin):
     """
     Deny access to unapproved users.
     """
     def test_func(self):
-        return self.request.user.is_approved
+        return self.request.user.is_authenticated and self.request.user.is_approved
 
 
 class AddClientMixin:
