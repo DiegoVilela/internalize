@@ -6,35 +6,39 @@ from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import Http404
 from django.forms import inlineformset_factory
+from django.core.exceptions import PermissionDenied
 
 from .models import CI, Client, Site, Manufacturer, Appliance, CIPack
 from .forms import UploadCIsForm, CIForm, ApplianceForm
 from .loader import CILoader
-from .mixins import AddClientMixin
+from .mixins import UserApprovedMixin, AddClientMixin
 
 
 def homepage(request):
     user = request.user
-    if user.is_authenticated and not user.is_approved:
+    if not user.is_anonymous and not user.is_approved:
         messages.warning(request, 'Your account needs to be approved. '
                                   'Please contact you Account Manager.')
     return render(request, 'homepage.html')
 
 
-class SiteCreateView(SuccessMessageMixin, AddClientMixin, CreateView):
+class SiteCreateView(UserApprovedMixin, SuccessMessageMixin, AddClientMixin, CreateView):
     model = Site
     fields = ('name', 'description')
     success_message = "The site %(name)s was created successfully."
 
 
-class SiteUpdateView(SuccessMessageMixin, UpdateView):
+class SiteUpdateView(UserApprovedMixin, SuccessMessageMixin, UpdateView):
     model = Site
     fields = ('name', 'description')
     queryset = Site.objects.select_related('client')
     success_message = "The site %(name)s was updated successfully."
 
 
+@login_required
 def manage_client_sites(request):
+    if not request.user.is_approved: raise PermissionDenied()
+
     client = request.user.client
     SiteInlineFormSet = inlineformset_factory(
         Client, Site,
@@ -56,7 +60,7 @@ def manage_client_sites(request):
     })
 
 
-class CICreateView(SuccessMessageMixin, AddClientMixin, CreateView):
+class CICreateView(UserApprovedMixin, SuccessMessageMixin, AddClientMixin, CreateView):
     model = CI
     form_class = CIForm
     success_message = "The CI was updated successfully."
@@ -68,7 +72,7 @@ class CICreateView(SuccessMessageMixin, AddClientMixin, CreateView):
         return kwargs
 
 
-class CIListView(ListView):
+class CIListView(UserApprovedMixin, ListView):
     model = CI
 
     def get_queryset(self):
@@ -78,7 +82,7 @@ class CIListView(ListView):
         )
 
 
-class CIDetailView(DetailView):
+class CIDetailView(UserApprovedMixin, DetailView):
     model = CI
     queryset = CI.objects.select_related('site', 'contract')
 
@@ -91,7 +95,7 @@ class CIDetailView(DetailView):
         return object
 
 
-class ManufacturerDetailView(DetailView):
+class ManufacturerDetailView(UserApprovedMixin, DetailView):
     model = Manufacturer
 
     def get_context_data(self, **kwargs):
@@ -102,20 +106,20 @@ class ManufacturerDetailView(DetailView):
         return context
 
 
-class ApplianceListView(ListView):
+class ApplianceListView(UserApprovedMixin, ListView):
     model = Appliance
 
     def get_queryset(self):
         return Appliance.objects.filter(client=self.request.user.client)
 
 
-class ApplianceCreateView(SuccessMessageMixin, AddClientMixin, CreateView):
+class ApplianceCreateView(UserApprovedMixin, SuccessMessageMixin, AddClientMixin, CreateView):
     model = Appliance
     form_class = ApplianceForm
     success_message = "The appliance was created successfully."
 
 
-class ApplianceUpdateView(SuccessMessageMixin, UpdateView):
+class ApplianceUpdateView(UserApprovedMixin, SuccessMessageMixin, UpdateView):
     model = Appliance
     form_class = ApplianceForm
     queryset = Appliance.objects.select_related('client', 'manufacturer')
@@ -124,6 +128,8 @@ class ApplianceUpdateView(SuccessMessageMixin, UpdateView):
 
 @login_required
 def ci_upload(request):
+    if not request.user.is_approved: raise PermissionDenied()
+
     result = None
 
     if request.method == 'POST':
@@ -142,6 +148,8 @@ def ci_upload(request):
 
 @login_required
 def send_ci_pack(request):
+    if not request.user.is_approved: raise PermissionDenied()
+
     if request.method == 'POST':
         pack = CIPack(responsible=request.user)
         pack.save()
