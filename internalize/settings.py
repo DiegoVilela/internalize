@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'cis',
     'django_registration',
+    'crispy_forms',
     'debug_toolbar',
 ]
 
@@ -150,3 +151,6 @@ MESSAGE_TAGS = {
 # Debug Toolbar
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#configuring-internal-ips
 INTERNAL_IPS = ['127.0.0.1']
+
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'

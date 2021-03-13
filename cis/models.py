@@ -58,6 +58,14 @@ class Site(models.Model):
     def get_absolute_url(self):
         return reverse('cis:site_update', args=[self.pk])
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['client', 'name'],
+                name='unique_client_site_name'
+            )
+        ]
+
 
 class ISP(Company):
     """Model representing a Internet Service Provider company"""

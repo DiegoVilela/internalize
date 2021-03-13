@@ -3,6 +3,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
 from django.http import Http404
 from django.forms import inlineformset_factory
 
@@ -14,22 +15,23 @@ from .mixins import AddClientMixin
 
 def homepage(request):
     user = request.user
-    if user.is_authenticated:
-        if not user.is_approved:
-            messages.warning(request, 'Your account needs to be approved. '
-                                      'Please contact you Account Manager.')
+    if user.is_authenticated and not user.is_approved:
+        messages.warning(request, 'Your account needs to be approved. '
+                                  'Please contact you Account Manager.')
     return render(request, 'homepage.html')
 
 
-class SiteCreateView(AddClientMixin, CreateView):
+class SiteCreateView(SuccessMessageMixin, AddClientMixin, CreateView):
     model = Site
     fields = ('name', 'description')
+    success_message = "The site %(name)s was created successfully."
 
 
-class SiteUpdateView(UpdateView):
+class SiteUpdateView(SuccessMessageMixin, UpdateView):
     model = Site
     fields = ('name', 'description')
     queryset = Site.objects.select_related('client')
+    success_message = "The site %(name)s was updated successfully."
 
 
 def manage_client_sites(request):
@@ -39,22 +41,25 @@ def manage_client_sites(request):
         fields=('name', 'description'),
         extra=0,
     )
+    formset = SiteInlineFormSet(instance=client)
+
     if request.method == 'POST':
         formset = SiteInlineFormSet(request.POST, instance=client)
         if formset.is_valid():
             formset.save()
+            messages.success(request, "The sites were updated successfully.")
             return redirect(reverse('cis:manage_client_sites'))
-    else:
-        formset = SiteInlineFormSet(instance=client)
-        return render(request, 'cis/manage_client_sites.html', {
-            'formset': formset,
-            'client': client,
-        })
+
+    return render(request, 'cis/manage_client_sites.html', {
+        'formset': formset,
+        'client': client,
+    })
 
 
-class CICreateView(AddClientMixin, CreateView):
+class CICreateView(SuccessMessageMixin, AddClientMixin, CreateView):
     model = CI
     form_class = CIForm
+    success_message = "The CI was updated successfully."
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -104,15 +109,17 @@ class ApplianceListView(ListView):
         return Appliance.objects.filter(client=self.request.user.client)
 
 
-class ApplianceCreateView(AddClientMixin, CreateView):
+class ApplianceCreateView(SuccessMessageMixin, AddClientMixin, CreateView):
     model = Appliance
     form_class = ApplianceForm
+    success_message = "The appliance was created successfully."
 
 
-class ApplianceUpdateView(UpdateView):
+class ApplianceUpdateView(SuccessMessageMixin, UpdateView):
     model = Appliance
     form_class = ApplianceForm
     queryset = Appliance.objects.select_related('client', 'manufacturer')
+    success_message = "The appliance was updated successfully."
 
 
 @login_required

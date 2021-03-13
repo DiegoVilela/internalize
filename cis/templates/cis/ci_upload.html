@@ -1,14 +1,24 @@
 {% extends "base_generic.html" %}
 
-{% block title %}ATS Upload{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block title %}Upload{% endblock %}
 
 {% block content %}
-    <h1 class="h5 my-4">ATS Upload{% if result.client.name %} | {{ result.client.name }}{% endif %}</h1>
+    <div class="row justify-content-md-center mt-4">
+        <div class="col-md-4">
+            <h1 class="h5">Upload</h1>
+        </div>
+    </div>
 
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="Upload" />
+        <div class="row justify-content-md-center mt-4">
+            <div class="col-md-4">
+                {{ form|crispy }}
+                <input class="btn btn-primary float-right" type="submit" value="Upload">
+            </div>
+        </div>
     </form>
 
     {% if result %}

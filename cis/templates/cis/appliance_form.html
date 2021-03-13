@@ -1,14 +1,25 @@
 {% extends "base_generic.html" %}
 
+{% load crispy_forms_tags %}
+
 {% block title %}Appliance{% endblock %}
 
 {% block content %}
-<h1 class="h5 my-4">Appliance</h1>
+
+<div class="row justify-content-md-center mt-4">
+  <div class="col-md-4">
+    <h1 class="h5">Appliance</h1>
+  </div>
+</div>
 
 <form method="post">
   {% csrf_token %}
-  {{ form.as_p }}
-  <input type="submit" value="Save">
+  <div class="row justify-content-md-center mt-4">
+    <div class="col-md-4">
+      {{ form|crispy }}
+      <input class="btn btn-primary float-right" type="submit" value="Save">
+    </div>
+  </div>
 </form>
 
 {% endblock %}
