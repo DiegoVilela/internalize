@@ -1,7 +1,7 @@
 # Internalize
 
 The purpose of this project is to ease the transit of configuration
-items data between a small IT managed services provider (MSP) and
+item data between a small IT managed services provider (MSP) and
 its clients.
 
 ## Workflow
