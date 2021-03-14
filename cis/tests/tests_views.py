@@ -31,14 +31,14 @@ class SiteViewTest(TestCase):
             response.client.logout()
 
     def test_raises_exception_unapproved_user(self):
-        client_a = self.users['a'].client
-        self.users['a'].client = None
-        self.users['a'].save()
-        self.client.force_login(self.users['a'])
+        user = self.users['a']
+        user.client = None
+        user.save()
+        self.client.force_login(user)
         response = self.client.get(reverse('cis:manage_client_sites'))
         self.assertEqual(response.status_code, 403)
-        self.users['a'].client = client_a
-        self.users['a'].save()
+        user.client = self.users['a'].client
+        user.save()
 
     def test_no_site_found(self):
         Site.objects.all().delete()
