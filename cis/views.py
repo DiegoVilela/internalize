@@ -116,7 +116,7 @@ class ApplianceListView(UserApprovedMixin, ListView):
 class ApplianceCreateView(UserApprovedMixin, SuccessMessageMixin, AddClientMixin, CreateView):
     model = Appliance
     form_class = ApplianceForm
-    success_message = "The appliance was created successfully."
+    success_message = "The appliance %(serial_number)s was created successfully."
 
 
 class ApplianceUpdateView(UserApprovedMixin, SuccessMessageMixin, UpdateView):

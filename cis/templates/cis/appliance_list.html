@@ -5,6 +5,7 @@
 {% block content %}
 <h1 class="h5 my-4">Appliances</h1>
 
+{% if appliance_list %}
 <table class="table table-bordered table-hover" id="dataTable">
     <thead>
     <tr>
@@ -25,5 +26,8 @@
     {% endfor %}
     </tbody>
 </table>
+{% else %}
+<p class="lead">No appliance was found.</p>
+{% endif %}
 
 {% endblock %}
