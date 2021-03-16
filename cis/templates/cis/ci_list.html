@@ -7,6 +7,7 @@
 
 <form action="{% url 'cis:ci_pack_send' %}" method="post">
     {% csrf_token %}
+    {% if ci_list %}
     <table class="table table-bordered table-hover" id="dataTable">
         <thead>
         <tr>
@@ -38,5 +39,8 @@
         </tbody>
     </table>
     <input type="submit" value="Send to Production">
+    {% else %}
+        <p class="lead">No configuration item was found.</p>
+    {% endif %}
 </form>
 {% endblock %}
