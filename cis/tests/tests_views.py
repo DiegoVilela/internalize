@@ -12,6 +12,7 @@ class TestDetail:
 
     Applied to Site, Appliance, and CI
     """
+
     def __init__(self, message, context_object_name, template_name, lookup_text):
         self.letter = None
         self.message = message
@@ -66,6 +67,8 @@ class SiteApplianceAndCIViewTest(TestCase):
     Test CI, Site and Appliance views.
     """
     users = {}
+    sites = {}
+    appliances = {}
 
     @classmethod
     def setUpTestData(cls):
@@ -73,7 +76,7 @@ class SiteApplianceAndCIViewTest(TestCase):
         Set up the database to be used in all testes in this class.
 
         Client A and Client B will have their respective User, CI, and Site.
-        cls.users = {'a': user_a, 'b': user_b}
+        cls.users = {'a': user_A, 'b': user_B}
         """
 
         manufacturer = Manufacturer.objects.create(name='Cisco')
@@ -81,11 +84,17 @@ class SiteApplianceAndCIViewTest(TestCase):
         for letter in ['A', 'B']:
             client = Client.objects.create(name=f'Client {letter}')
             site = Site.objects.create(client=client, name=f'Site Client {letter}')
-            create_appliance(client, manufacturer, letter)
+            appliance = create_appliance(client, manufacturer, letter)
             create_ci(client, site, letter, contract)
             user = User.objects.create_user(f'user_{letter}', password='faith', client=client)
             cls.users.update({letter: user})
+            cls.sites.update({letter: site})
+            cls.appliances.update({letter: appliance})
             cls.manufacturer = manufacturer
+            cls.contract = contract
+
+    def setUp(self):
+        self.client.force_login(self.users['A'])
 
     def test_show_correct_items_by_client(self):
 
@@ -117,9 +126,6 @@ class SiteApplianceAndCIViewTest(TestCase):
             self.assertIsNone(response.context)
             self.assertEqual(response.status_code, 403)
 
-        user.client = self.users['A'].client
-        user.save()
-
     def test_not_found(self):
         client = Client.objects.create(name=f'Client C')
         user = User.objects.create_user(f'user_c', password='faith', client=client)
@@ -135,28 +141,52 @@ class SiteApplianceAndCIViewTest(TestCase):
     def test_create(self):
         self.client.force_login(self.users['A'])
 
-        # test Site
-        data = {'name': "Paulista Avenue"}
-        response = self.client.post(reverse('cis:site_create'), data, follow=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'cis/site_form.html')
-        self.assertContains(response, "The site Paulista Avenue was created successfully.", count=1)
-
-        # test Appliance
-        data = {
-            'serial_number': 'SERIAL_1',
-            'manufacture': self.manufacturer,
-            'model': 'ABC123',
-            'virtual': True,
+        # map urls to info that needs to be checked
+        details = {
+            'cis:site_create': {
+                'data': {'name': "New Site"},
+                'template_name': 'cis/site_form.html',
+                'contains': ['The site New Site was created successfully.'],
+            },
+            'cis:appliance_create': {
+                'data': {
+                    'serial_number': 'NEW_SERIAL',
+                    'manufacture': self.manufacturer,
+                    'model': 'ABC123',
+                    'virtual': True,
+                },
+                'template_name': 'cis/appliance_form.html',
+                'contains': ['NEW_SERIAL', 'Cisco', 'ABC123']
+            },
+            'cis:ci_create': {
+                'data': {
+                    'site': self.sites['A'].id,
+                    'appliances': (self.appliances['A'].id,),
+                    'hostname': 'NEW_HOST',
+                    'ip': '10.10.10.254',
+                    'description': 'New Configuration Item',
+                    'deployed': True,
+                    'business_impact': 'high',
+                    'contract': self.contract,
+                },
+                'template_name': 'cis/ci_form.html',
+                'contains': [
+                    'NEW_HOST',
+                    self.appliances['A'].serial_number,
+                ]
+            }
         }
-        response = self.client.post(reverse('cis:appliance_create'), data, follow=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'cis/appliance_form.html')
-        self.assertContains(response, 'SERIAL_1', count=1)
+        # test Site, Appliance, and CI
+        for url, info in details.items():
+            response = self.client.post(reverse(url), info['data'], follow=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTemplateUsed(response, info['template_name'])
+            for text in info['contains']:
+                self.assertContains(response, text, count=1)
 
 
 def create_appliance(client, manufacturer, letter):
-    Appliance.objects.create(
+    return Appliance.objects.create(
         client=client,
         serial_number=f'SERIAL_CLIENT_{letter}',
         manufacturer=manufacturer,
