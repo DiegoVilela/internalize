@@ -26,16 +26,7 @@ class TestDetail:
 
     @property
     def not_contains(self):
-        return f'{self.lookup_text}{self.get_other_client()}'
-
-    def get_other_client(self):
-        """
-        Return the other client based on the current one.
-        """
-        client = 'A'
-        if self.letter == 'A':
-            client = 'B'
-        return client
+        return f"{self.lookup_text}{'B' if self.letter == 'A' else 'A'}"
 
 
 # Maps the details of tests applied to
