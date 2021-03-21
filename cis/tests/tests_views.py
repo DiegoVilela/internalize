@@ -1,4 +1,5 @@
 from datetime import timedelta
+from collections import namedtuple
 from django.utils import timezone
 from django.test import TestCase
 from django.shortcuts import reverse
@@ -133,24 +134,25 @@ class SiteApplianceAndCIViewTest(TestCase):
         self.client.force_login(self.users['A'])
 
         # map urls to info that needs to be checked
+        TestInfo = namedtuple('TestInfo', ['data', 'template_name', 'contains'])
         details = {
-            'cis:site_create': {
-                'data': {'name': "New Site"},
-                'template_name': 'cis/site_form.html',
-                'contains': ['The site New Site was created successfully.'],
-            },
-            'cis:appliance_create': {
-                'data': {
+            'cis:site_create': TestInfo(
+                {'name': "New Site"},
+                'cis/site_form.html',
+                ['The site New Site was created successfully.'],
+            ),
+            'cis:appliance_create': TestInfo(
+                {
                     'serial_number': 'NEW_SERIAL',
                     'manufacture': self.manufacturer,
                     'model': 'ABC123',
                     'virtual': True,
                 },
-                'template_name': 'cis/appliance_form.html',
-                'contains': ['NEW_SERIAL', 'Cisco', 'ABC123']
-            },
-            'cis:ci_create': {
-                'data': {
+                'cis/appliance_form.html',
+                ['NEW_SERIAL', 'Cisco', 'ABC123'],
+            ),
+            'cis:ci_create': TestInfo(
+                {
                     'site': self.sites['A'].id,
                     'appliances': (self.appliances['A'].id,),
                     'hostname': 'NEW_HOST',
@@ -160,19 +162,16 @@ class SiteApplianceAndCIViewTest(TestCase):
                     'business_impact': 'high',
                     'contract': self.contract,
                 },
-                'template_name': 'cis/ci_form.html',
-                'contains': [
-                    'NEW_HOST',
-                    self.appliances['A'].serial_number,
-                ]
-            }
+                'cis/ci_form.html',
+                ['NEW_HOST', self.appliances['A'].serial_number],
+            )
         }
         # test Site, Appliance, and CI
         for url, info in details.items():
-            response = self.client.post(reverse(url), info['data'], follow=True)
+            response = self.client.post(reverse(url), info.data, follow=True)
             self.assertEqual(response.status_code, 200)
-            self.assertTemplateUsed(response, info['template_name'])
-            for text in info['contains']:
+            self.assertTemplateUsed(response, info.template_name)
+            for text in info.contains:
                 self.assertContains(response, text, count=1)
 
 
