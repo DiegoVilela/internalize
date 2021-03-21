@@ -1,5 +1,6 @@
 from datetime import timedelta
 from collections import namedtuple
+from dataclasses import dataclass
 from django.utils import timezone
 from django.test import TestCase
 from django.shortcuts import reverse
@@ -7,19 +8,19 @@ from django.shortcuts import reverse
 from cis.models import Client, Site, User, Appliance, Manufacturer, CI, Contract
 
 
-class TestDetail:
+@dataclass
+class ListInfo:
     """
     Wraps the details of each test.
 
-    Applied to Site, Appliance, and CI
+    Applied to Site, Appliance, and CI.
     """
 
-    def __init__(self, message, context_object_name, template_name, lookup_text):
-        self.letter = None
-        self.message = message
-        self.context_object_name = context_object_name
-        self.template_name = template_name
-        self.lookup_text = lookup_text
+    message: str
+    context_object_name: str
+    template_name: str
+    lookup_text: str
+    letter: str = 'A'
 
     @property
     def contains(self):
@@ -28,30 +29,6 @@ class TestDetail:
     @property
     def not_contains(self):
         return f"{self.lookup_text}{'B' if self.letter == 'A' else 'A'}"
-
-
-# Maps the details of tests applied to
-# Site, Appliance, and, CI, respectively.
-MAP_URLS_TO_TESTES = {
-    reverse('cis:manage_client_sites'): TestDetail(
-        message='No site was found.',
-        context_object_name='formset',
-        template_name='cis/manage_client_sites.html',
-        lookup_text='Site Client ',
-    ),
-    reverse('cis:appliance_list'): TestDetail(
-        message='No appliance was found.',
-        context_object_name='appliance_list',
-        template_name='cis/appliance_list.html',
-        lookup_text='SERIAL_CLIENT_',
-    ),
-    reverse('cis:ci_list', args=(0,)): TestDetail(
-        message='No configuration item was found.',
-        context_object_name='ci_list',
-        template_name='cis/ci_list.html',
-        lookup_text='HOST_',
-    ),
-}
 
 
 class SiteApplianceAndCIViewTest(TestCase):
@@ -85,8 +62,28 @@ class SiteApplianceAndCIViewTest(TestCase):
             cls.manufacturer = manufacturer
             cls.contract = contract
 
-    def setUp(self):
-        self.client.force_login(self.users['A'])
+        # Maps the details of the tests applied to
+        # Site, Appliance, and, CI list views, respectively.
+        cls.list_details = {
+            reverse('cis:manage_client_sites'): ListInfo(
+                'No site was found.',
+                'formset',
+                'cis/manage_client_sites.html',
+                'Site Client ',
+            ),
+            reverse('cis:appliance_list'): ListInfo(
+                'No appliance was found.',
+                'appliance_list',
+                'cis/appliance_list.html',
+                'SERIAL_CLIENT_',
+            ),
+            reverse('cis:ci_list', args=(0,)): ListInfo(
+                'No configuration item was found.',
+                'ci_list',
+                'cis/ci_list.html',
+                'HOST_',
+            ),
+        }
 
     def test_show_correct_items_by_client(self):
 
@@ -95,7 +92,7 @@ class SiteApplianceAndCIViewTest(TestCase):
             self.client.force_login(user)
 
             # test Site, Appliance, and CI
-            for url, test in MAP_URLS_TO_TESTES.items():
+            for url, test in self.list_details.items():
                 test.letter = k
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, 200)
@@ -113,7 +110,7 @@ class SiteApplianceAndCIViewTest(TestCase):
         self.client.force_login(user)
 
         # test Site, Appliance, and CI
-        for url in MAP_URLS_TO_TESTES.keys():
+        for url in self.list_details.keys():
             response = self.client.get(url)
             self.assertIsNone(response.context)
             self.assertEqual(response.status_code, 403)
@@ -124,7 +121,7 @@ class SiteApplianceAndCIViewTest(TestCase):
         self.client.force_login(user)
 
         # test Site, Appliance, and CI
-        for url, test in MAP_URLS_TO_TESTES.items():
+        for url, test in self.list_details.items():
             response = self.client.get(url)
             self.assertContains(response, test.message, count=1)
             self.assertEqual(len(response.context[test.context_object_name]), 0)
@@ -134,14 +131,14 @@ class SiteApplianceAndCIViewTest(TestCase):
         self.client.force_login(self.users['A'])
 
         # map urls to info that needs to be checked
-        TestInfo = namedtuple('TestInfo', ['data', 'template_name', 'contains'])
+        CreateInfo = namedtuple('CreateInfo', ['data', 'template_name', 'contains'])
         details = {
-            'cis:site_create': TestInfo(
+            'cis:site_create': CreateInfo(
                 {'name': "New Site"},
                 'cis/site_form.html',
                 ['The site New Site was created successfully.'],
             ),
-            'cis:appliance_create': TestInfo(
+            'cis:appliance_create': CreateInfo(
                 {
                     'serial_number': 'NEW_SERIAL',
                     'manufacture': self.manufacturer,
@@ -151,7 +148,7 @@ class SiteApplianceAndCIViewTest(TestCase):
                 'cis/appliance_form.html',
                 ['NEW_SERIAL', 'Cisco', 'ABC123'],
             ),
-            'cis:ci_create': TestInfo(
+            'cis:ci_create': CreateInfo(
                 {
                     'site': self.sites['A'].id,
                     'appliances': (self.appliances['A'].id,),
