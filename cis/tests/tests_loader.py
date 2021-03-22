@@ -1,5 +1,6 @@
-from openpyxl import Workbook
+from pathlib import Path
 from collections import namedtuple
+from openpyxl import Workbook
 from django.test import TestCase
 
 from ..models import Client, Site, Contract, Manufacturer
@@ -17,6 +18,10 @@ class CILoaderTest(TestCase):
     def setUpTestData(cls):
         create_workbook()
         cls.loader = CILoader(SPREADSHEET_FILE).save()
+
+    @classmethod
+    def tearDownClass(cls):
+        Path(SPREADSHEET_FILE).unlink()
 
     def test_return_correct_client_object(self):
         self.assertIsInstance(self.loader.client, Client)
@@ -46,8 +51,13 @@ class CILoaderTest(TestCase):
     def test_loader_contains_correct_number_of_cis(self):
         self.assertEqual(len(self.loader.cis), 5)
 
-    def test_raise_exception_on_duplicated_item(self):
-        pass
+    def test_errors_contain_duplicated_items(self):
+        create_workbook()
+        loader = CILoader(SPREADSHEET_FILE).save()
+        self.assertEqual(len(loader.errors), 5)
+        self.assertEqual(len(loader.cis), 0)
+        self.assertTrue(str(loader.errors[0].exc).startswith(
+            'UNIQUE constraint failed'))
 
 
 def create_workbook():
