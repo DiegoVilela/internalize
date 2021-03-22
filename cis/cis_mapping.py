@@ -3,7 +3,7 @@ Field names and their column location (zero-indexed) on the spreadsheet
 """
 # Client field in "summary" sheet
 SUMMARY_SHEET = 'summary'
-CLIENT = 'A1'
+CLIENT_CELL = 'A1'
 
 CIS_SHEET = 'cis'
 # Setup fields in "cis" sheet

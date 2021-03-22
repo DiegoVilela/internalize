@@ -1,7 +1,8 @@
+from collections import namedtuple
 from openpyxl import load_workbook
 from django.db import IntegrityError, transaction
 from .models import Client, Site, CI, Appliance, Site, Contract, Manufacturer
-from .cis_mapping import CLIENT, SETUP_HOSTNAME, SETUP_IP, SETUP_DESCRIPTION, \
+from .cis_mapping import CLIENT_CELL, SETUP_HOSTNAME, SETUP_IP, SETUP_DESCRIPTION, \
     SETUP_DEPLOYED, SETUP_BUSINESS_IMPACT, SITE, SITE_DESCRIPTION, CONTRACT, \
     CONTRACT_BEGIN, CONTRACT_END, CONTRACT_DESCRIPTION, CREDENTIAL_USERNAME, \
     CREDENTIAL_PASSWORD, CREDENTIAL_ENABLE_PASSWORD, CREDENTIAL_INSTRUCTIONS, \
@@ -16,20 +17,22 @@ class CILoader:
         self.sites = {}
         self.contracts = {}
         self.manufacturers = {}
+        self.cis = []
+        self.errors = []
 
     def save(self):
         cis_sheet = self._workbook[CIS_SHEET]
 
-        response = FileHandlerResponse(self.client)
+        Error = namedtuple('Error', ['exc', 'row'])
         for row in cis_sheet.iter_rows(min_row=2, values_only=True):
             try:
                 with transaction.atomic():
                     ci = self._create_ci(row)
                     ci.appliances.set(self._get_ci_appliances(ci, row))
-                response.count_ci()
+                self.cis.append(ci)
             except IntegrityError as e:
-                response.add_error({'exception': e, 'row': row})
-        return response
+                self.errors.append(Error(e, row))
+        return self
 
     def _create_ci(self, row):
         return CI.objects.create(
@@ -57,7 +60,7 @@ class CILoader:
 
     def _get_client(self):
         summary_sheet = self._workbook[SUMMARY_SHEET]
-        name = summary_sheet[CLIENT].value
+        name = summary_sheet[CLIENT_CELL].value
         self.client, created = Client.objects.get_or_create(name=name)
         return self.client
 
@@ -102,17 +105,3 @@ class CILoader:
                 name=name,
             )
             return self.manufacturers[name]
-
-
-class FileHandlerResponse:
-
-    def __init__(self, client):
-        self.client = client
-        self.cis_inserted = 0
-        self.errors = []
-
-    def add_error(self, exc_dict):
-        self.errors.append(exc_dict)
-
-    def count_ci(self):
-        self.cis_inserted += 1

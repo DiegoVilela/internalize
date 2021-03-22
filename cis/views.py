@@ -131,14 +131,12 @@ def ci_upload(request):
     if not request.user.is_approved: raise PermissionDenied()
 
     result = None
+    form = UploadCIsForm()
 
     if request.method == 'POST':
         form = UploadCIsForm(request.POST, request.FILES)
         if form.is_valid():
-            loader = CILoader(request.FILES['file'])
-            result = loader.save()
-    else:
-        form = UploadCIsForm()
+            result = CILoader(request.FILES['file']).save()
 
     return render(request, 'cis/ci_upload.html', {
         'form': form,
