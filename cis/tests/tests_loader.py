@@ -22,6 +22,7 @@ class CILoaderTest(TestCase):
     @classmethod
     def tearDownClass(cls):
         Path(SPREADSHEET_FILE).unlink()
+        super().tearDownClass()
 
     def test_return_correct_client_object(self):
         self.assertIsInstance(self.loader.client, Client)
