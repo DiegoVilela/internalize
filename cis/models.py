@@ -116,7 +116,7 @@ class Appliance(models.Model):
     serial_number = models.CharField(max_length=255, unique=True)
     manufacturer = models.ForeignKey(Manufacturer, on_delete=models.SET_NULL, null=True)
     model = models.CharField(max_length=100)
-    virtual = models.BooleanField()
+    virtual = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.manufacturer} | {self.model} | {self.serial_number}"
