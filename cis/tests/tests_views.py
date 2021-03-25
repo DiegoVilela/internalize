@@ -50,7 +50,7 @@ class SiteApplianceAndCIViewTest(TestCase):
 
         manufacturer = Manufacturer.objects.create(name='Cisco')
         contract = create_contract()
-        for letter in ['A', 'B']:
+        for letter in {'A', 'B'}:
             client = Client.objects.create(name=f'Client {letter}')
             site = Site.objects.create(client=client, name=f'Site Client {letter}')
             appliance = create_appliance(client, manufacturer, letter)
