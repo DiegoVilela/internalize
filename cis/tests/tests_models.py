@@ -1,5 +1,8 @@
+from django.shortcuts import reverse
 from django.test import TestCase
-from ..models import User, Client
+from django.db.utils import IntegrityError
+
+from ..models import User, Client, Site, Manufacturer
 
 
 class UserTest(TestCase):
@@ -19,3 +22,72 @@ class UserTest(TestCase):
 
     def test_user_as_string_returns_username(self):
         self.assertEqual(str(self.user), self.username)
+
+    def test_duplicate_name_raises_exception(self):
+        with self.assertRaises(IntegrityError):
+            User.objects.create(username=self.username)
+
+    def test_object_is_of_user_type(self):
+        self.assertIsInstance(self.user, User)
+
+
+class ClientTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.name = 'New Client'
+        cls.company_client = Client.objects.create(name=cls.name)
+
+    def test_client_as_string_returns_name(self):
+        self.assertEqual(str(self.company_client), self.name)
+
+    def test_duplicate_name_raises_exception(self):
+        with self.assertRaises(IntegrityError):
+            Client.objects.create(name=self.name)
+
+    def test_object_is_of_client_type(self):
+        self.assertIsInstance(self.company_client, Client)
+
+
+class SiteTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.name = 'New Site'
+        cls.company_client = Client.objects.create(name=cls.name)
+        cls.site = Site.objects.create(name=cls.name, client=cls.company_client)
+
+    def test_as_string_returns_client_plus_site_name(self):
+        self.assertEqual(
+            str(self.site), f'{self.company_client.name} | {self.name}')
+
+    def test_duplicate_name_by_client_raises_exception(self):
+        with self.assertRaises(IntegrityError):
+            Site.objects.create(name=self.name, client=self.company_client)
+
+    def test_duplicate_name_different_client_is_ok(self):
+        client = Client.objects.create(name='Different Client')
+        self.assertIsNotNone(Site.objects.create(name=self.name, client=client))
+
+    def test_object_is_of_site_type(self):
+        self.assertIsInstance(self.site, Site)
+
+    def test_absolute_url_returns_correct_url(self):
+        self.assertEqual(
+            self.site.get_absolute_url(),
+            reverse('cis:site_update', args=[self.site.pk]))
+
+
+class ManufacturerTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.name = 'New Manufacturer'
+        cls.manufacturer = Manufacturer.objects.create(name=cls.name)
+
+    def test_as_string_returns_name(self):
+        self.assertEqual(str(self.manufacturer), self.name)
+
+    def test_duplicate_name_raises_exception(self):
+        with self.assertRaises(IntegrityError):
+            Manufacturer.objects.create(name=self.name)
+
+    def test_object_is_of_manufacturer_type(self):
+        self.assertIsInstance(self.manufacturer, Manufacturer)
