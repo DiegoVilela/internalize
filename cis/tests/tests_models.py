@@ -2,7 +2,7 @@ from django.shortcuts import reverse
 from django.test import TestCase
 from django.db.utils import IntegrityError
 
-from ..models import User, Client, Site, Manufacturer
+from ..models import User, Client, Site, Manufacturer, Contract, Appliance
 
 
 class UserTest(TestCase):
@@ -57,7 +57,8 @@ class SiteTest(TestCase):
 
     def test_as_string_returns_client_plus_site_name(self):
         self.assertEqual(
-            str(self.site), f'{self.company_client.name} | {self.name}')
+            str(self.site), f'{self.company_client.name} | {self.name}'
+        )
 
     def test_duplicate_name_by_client_raises_exception(self):
         with self.assertRaises(IntegrityError):
@@ -73,7 +74,8 @@ class SiteTest(TestCase):
     def test_absolute_url_returns_correct_url(self):
         self.assertEqual(
             self.site.get_absolute_url(),
-            reverse('cis:site_update', args=[self.site.pk]))
+            reverse('cis:site_update', args=[self.site.pk])
+        )
 
 
 class ManufacturerTest(TestCase):
@@ -91,3 +93,60 @@ class ManufacturerTest(TestCase):
 
     def test_object_is_of_manufacturer_type(self):
         self.assertIsInstance(self.manufacturer, Manufacturer)
+
+
+class ContractTest(TestCase):
+    def test_as_string_returns_name(self):
+        name = 'CT-001'
+        contract = Contract.objects.create(
+            name=name,
+            begin='2021-01-01',
+            end='2022-01-01',
+            description='Contract description',
+        )
+        self.assertEqual(str(contract), name)
+
+
+class ApplianceTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.serial_number = 'NEW123'
+        cls.model = 'ABC'
+        cls.manufacturer = Manufacturer.objects.create(name='Manufacturer')
+        cls.company_client = Client.objects.create(name='Client')
+        cls.appliance = _create_appliance(
+            cls.company_client, cls.serial_number, cls.manufacturer, cls.model
+        )
+
+    def test_as_string_returns_full_name(self):
+        self.assertEqual(
+            str(self.appliance),
+            f'{self.manufacturer.name} | {self.model} | {self.serial_number}'
+        )
+
+    def test_duplicate_serial_raises_exception(self):
+        with self.assertRaises(IntegrityError):
+            _create_appliance(
+                self.company_client,
+                self.serial_number,
+                self.manufacturer,
+                self.model
+            )
+
+    def test_object_is_of_appliance_type(self):
+        self.assertIsInstance(self.appliance, Appliance)
+
+    def test_absolute_url_returns_correct_url(self):
+        self.assertEqual(
+            self.appliance.get_absolute_url(),
+            reverse('cis:appliance_update', args=[self.appliance.pk])
+        )
+
+
+def _create_appliance(client, serial, manufacturer, model):
+    return Appliance.objects.create(
+        client=client,
+        serial_number=serial,
+        manufacturer=manufacturer,
+        model=model,
+    )
