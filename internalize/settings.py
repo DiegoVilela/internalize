@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django_registration',
     'crispy_forms',
     'debug_toolbar',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
