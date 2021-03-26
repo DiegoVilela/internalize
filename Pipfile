@@ -8,9 +8,11 @@ openpyxl = "*"
 Django = "*"
 django-registration = "*"
 django-crispy-forms = "*"
+django-extensions = "*"
 
 [dev-packages]
 django-debug-toolbar = "*"
+selenium = "*"
 
 [requires]
 python_version = "3.8"
