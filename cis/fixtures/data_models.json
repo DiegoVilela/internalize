@@ -1,0 +1,83 @@
+[
+{
+    "model": "cis.client",
+    "pk": 1,
+    "fields": {
+        "name": "The Client"
+    }
+},
+{
+    "model": "cis.site",
+    "pk": 1,
+    "fields": {
+        "client": 1,
+        "name": "Main",
+        "description": "Sao Paulo"
+    }
+},
+{
+    "model": "cis.site",
+    "pk": 2,
+    "fields": {
+        "client": 1,
+        "name": "Branch",
+        "description": "Belo Horizonte"
+    }
+},
+{
+    "model": "cis.manufacturer",
+    "pk": 1,
+    "fields": {
+        "name": "Cisco"
+    }
+},
+{
+    "model": "cis.contract",
+    "pk": 1,
+    "fields": {
+        "name": "BR-001",
+        "begin": "2021-01-01",
+        "end": "2022-01-01",
+        "description": "Contract BR-001 description."
+    }
+},
+{
+    "model": "cis.appliance",
+    "pk": 1,
+    "fields": {
+        "client": 1,
+        "serial_number": "SERIAL1",
+        "manufacturer": 1,
+        "model": "ABC123",
+        "virtual": false
+    }
+},
+{
+    "model": "cis.credential",
+    "pk": 1,
+    "fields": {
+        "username": "admin",
+        "password": "admin",
+        "enable_password": "enable",
+        "instructions": null
+    }
+},
+{
+    "model": "cis.ci",
+    "pk": 1,
+    "fields": {
+        "client": 1,
+        "site": 1,
+        "hostname": "CORE",
+        "ip": "10.10.20.20",
+        "description": "Switch Core",
+        "deployed": false,
+        "business_impact": "high",
+        "contract": 1,
+        "status": 0,
+        "appliances": [
+            1
+        ]
+    }
+}
+]
