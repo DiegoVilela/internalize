@@ -57,8 +57,9 @@ class CILoaderTest(TestCase):
         loader = CILoader(SPREADSHEET_FILE).save()
         self.assertEqual(len(loader.errors), 5)
         self.assertEqual(len(loader.cis), 0)
-        self.assertTrue(str(loader.errors[0].exc).startswith(
-            'UNIQUE constraint failed'))
+        self.assertTrue(
+            'unique constraint' in str(loader.errors[0].exc).lower()
+        )
 
 
 def create_workbook():
