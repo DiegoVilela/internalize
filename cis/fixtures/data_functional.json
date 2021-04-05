@@ -17,5 +17,29 @@
     "fields": {
         "name": "The Client"
     }
+},
+{
+    "model": "cis.site",
+    "pk": 1,
+    "fields": {
+        "name": "Site 1",
+        "client_id": 1
+    }
+},
+    {
+    "model": "cis.site",
+    "pk": 2,
+    "fields": {
+        "name": "Site 2",
+        "client_id": 1
+    }
+},
+{
+    "model": "cis.site",
+    "pk": 3,
+    "fields": {
+        "name": "Site 3",
+        "client_id": 1
+    }
 }
 ]

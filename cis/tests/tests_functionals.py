@@ -67,7 +67,7 @@ class LoginTest(StaticLiveServerTestCase):
 
 
 class SiteTest(StaticLiveServerTestCase):
-    fixtures = ['user.json']
+    fixtures = ['data_functional.json']
 
     @classmethod
     def setUpClass(cls):
@@ -103,15 +103,31 @@ class SiteTest(StaticLiveServerTestCase):
         name.send_keys(new_site_name)
         description = self.driver.find_element(By.ID, 'id_description')
         description.send_keys('Site description' + Keys.ENTER)
-        msg = WebDriverWait(self.driver, 3).until(
-            lambda d: d.find_element(By.CSS_SELECTOR, '.alert-success')
-        )
-        self.assertTrue(f'The site {new_site_name} was created successfully.' in msg.text)
+
+        msg = self._get_alert_success_text(self.driver)
+        self.assertTrue(f'The site {new_site_name} was created successfully.' in msg)
 
     def test_viewing_site(self):
-        client = Client.objects.get(pk=1)
-        site_name = 'New Site'
-        site = Site.objects.create(name=site_name, client=client)
-        self.driver.get(f'{self.live_server_url}/{app_name}/site/{site.pk}')
+        self.driver.get(f'{self.live_server_url}/{app_name}/site/1')
         new_site = self.driver.find_element(By.ID, 'id_name')
-        self.assertEqual(new_site.get_attribute('value'), site_name)
+        self.assertEqual(new_site.get_attribute('value'), 'Site 1')
+
+    def test_listing_sites(self):
+        self.driver.get(f'{self.live_server_url}/{app_name}/sites/')
+        for i in range(3):
+            site = self.driver.find_element(By.ID, f'id_site_set-{i}-name')
+            self.assertEqual(site.get_attribute('value'), f'Site {i+1}')
+
+    def test_deleting_site(self):
+        self.driver.get(f'{self.live_server_url}/{app_name}/sites/')
+        self.driver.find_element(By.ID, 'id_site_set-0-DELETE').click()
+        self.driver.find_element(By.XPATH, '//input[@value="Save"]').click()
+        msg = self._get_alert_success_text(self.driver)
+        self.assertTrue('The sites were updated successfully.' in msg)
+
+    @staticmethod
+    def _get_alert_success_text(driver: WebDriver) -> str:
+        msg = WebDriverWait(driver, 2).until(
+            lambda d: d.find_element(By.CSS_SELECTOR, '.alert-success')
+        )
+        return msg.text
