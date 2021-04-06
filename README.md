@@ -1,7 +1,10 @@
 # Internalize
 
-The purpose of this project is to ease the transit of configuration
-item data between a small IT managed services provider (MSP) and
+This project is an exercise to apply the concepts of the Django web
+framework and Python.
+
+The purpose of the app is to ease the transit of configuration
+item data between an IT managed services provider (MSP) and
 its clients.
 
 ## Workflow
