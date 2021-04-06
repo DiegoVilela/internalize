@@ -1,0 +1,80 @@
+[
+{
+    "model": "cis.contract",
+    "pk": 1,
+    "fields": {
+        "name": "BR-001",
+        "begin": "2021-01-01",
+        "end": "2022-01-01"
+    }
+},
+{
+    "model": "cis.ci",
+    "pk": 1,
+    "fields": {
+        "client": 1,
+        "site": 1,
+        "appliances": [1, 2],
+        "hostname": "SW-CORE",
+        "ip": "10.10.20.20",
+        "description": "Switch Core",
+        "contract": 1
+    }
+},
+{
+    "model": "cis.credential",
+    "pk": 1,
+    "fields": {
+        "username": "sw_user",
+        "password": "123core",
+        "enable_password": "enable123"
+    }
+},
+{
+    "model": "cis.ci",
+    "pk": 2,
+    "fields": {
+        "client": 1,
+        "site": 2,
+        "appliances": [3],
+        "hostname": "SW-FL1",
+        "ip": "10.10.20.30",
+        "description": "Switch Floor 1",
+        "contract": 1
+    }
+},
+{
+    "model": "cis.credential",
+    "pk": 2,
+    "fields": {
+        "username": "sw_user_fl1",
+        "password": "123fl1",
+        "enable_password": "enablefl1"
+    }
+},
+{
+    "model": "cis.ci",
+    "pk": 3,
+    "fields": {
+        "client": 1,
+        "site": 3,
+        "appliances": [3],
+        "hostname": "SW-FL2",
+        "ip": "10.10.20.40",
+        "description": "Switch Floor 2",
+        "contract": 1,
+        "username": "sw_user_fl2",
+        "password": "123fl2",
+        "enable_password": "enablefl2"
+    }
+},
+{
+    "model": "cis.credential",
+    "pk": 3,
+    "fields": {
+        "username": "sw_user_fl2",
+        "password": "123fl2",
+        "enable_password": "enablefl2"
+    }
+}
+]

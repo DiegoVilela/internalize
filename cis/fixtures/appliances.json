@@ -1,0 +1,41 @@
+[
+{
+    "model": "cis.manufacturer",
+    "pk": 1,
+    "fields": {
+        "name": "Cisco"
+    }
+},
+{
+    "model": "cis.appliance",
+    "pk": 1,
+    "fields": {
+        "client": 1,
+        "serial_number": "ABC121",
+        "manufacturer": 1,
+        "model": "C9500",
+        "virtual": true
+    }
+},
+{
+    "model": "cis.appliance",
+    "pk": 2,
+    "fields": {
+        "client": 1,
+        "serial_number": "ABC122",
+        "manufacturer": 1,
+        "model": "C9500",
+        "virtual": true
+    }
+},
+{
+    "model": "cis.appliance",
+    "pk": 3,
+    "fields": {
+        "client": 1,
+        "serial_number": "ABC123",
+        "manufacturer": 1,
+        "model": "C9500"
+    }
+}
+]

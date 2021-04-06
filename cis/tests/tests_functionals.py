@@ -13,7 +13,7 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 
-from ..models import User, Client, Site
+from ..models import User, Client, CI
 from ..urls import app_name
 
 USERNAME = 'user1'
@@ -30,7 +30,8 @@ class CommonTestMixin:
     Place the mixin early in the MRO in order to isolate
     setUpClass()/tearDownClass().
     """
-    fixtures = ['data_functional.json']
+
+    fixtures = ['users.json']
 
     @classmethod
     def setUpClass(cls):
@@ -113,6 +114,11 @@ class LoginTest(CommonTestMixin, StaticLiveServerTestCase):
 class SiteTest(CommonTestMixin, StaticLiveServerTestCase):
     """Test all features related to the Site model."""
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.fixtures.append('sites.json')
+
     def test_create_site(self):
         self.driver.get(f'{self.live_server_url}/{app_name}/site/create/')
         h1 = self.driver.find_element(By.TAG_NAME, 'h1')
@@ -147,6 +153,13 @@ class SiteTest(CommonTestMixin, StaticLiveServerTestCase):
 
 
 class ApplianceTest(CommonTestMixin, StaticLiveServerTestCase):
+    """Test all features related to the Appliance model."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.fixtures.append('appliances.json')
+
     def test_create_appliance(self):
         self.driver.get(f'{self.live_server_url}/{app_name}/appliance/create/')
         h1 = self.driver.find_element(By.TAG_NAME, 'h1')
@@ -180,3 +193,66 @@ class ApplianceTest(CommonTestMixin, StaticLiveServerTestCase):
         serials = self.driver.find_elements(By.CSS_SELECTOR, 'td>a')
         for i, serial in enumerate(serials):
             self.assertEqual(serial.text, f'ABC12{i + 1}')
+
+    def test_view_appliance_from_listing(self):
+        self.driver.get(f'{self.live_server_url}/{app_name}/appliances/')
+        serial_origin = self.driver.find_element(By.CSS_SELECTOR, 'td>a')
+        serial = serial_origin.text
+        serial_origin.click()
+        serial_target = self.driver.find_element(By.ID, 'id_serial_number')
+        self.assertEqual(serial, serial_target.get_attribute('value'))
+
+
+class CITest(CommonTestMixin, StaticLiveServerTestCase):
+    """Test all features related to the CI model."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.fixtures.extend(['sites.json', 'appliances.json', 'cis.json'])
+
+    def test_create_ci(self):
+        self.driver.get(f'{self.live_server_url}/{app_name}/ci/create/')
+        h1 = self.driver.find_element(By.TAG_NAME, 'h1')
+        self.assertEqual(h1.text, 'Configuration Item')
+
+        self.driver.find_element(By.ID, 'id_hostname').send_keys('NEW_HOST')
+        site_select = Select(self.driver.find_element(By.ID, 'id_site'))
+        site_select.select_by_value('1')
+        self.driver.find_element(By.ID, 'id_ip').send_keys('10.10.20.20')
+        contract_select = Select(self.driver.find_element(By.ID, 'id_contract'))
+        contract_select.select_by_index(1)
+        self.driver.find_element(By.ID, 'id_description').send_keys('Some text.')
+        appliances_select = Select(self.driver.find_element(By.ID, 'id_appliances'))
+        appliances_select.select_by_value('1')
+        appliances_select.select_by_value('2')
+        self.driver.find_element(By.ID, 'id_username').send_keys('admin')
+        self.driver.find_element(By.ID, 'id_password').send_keys('123')
+        self.driver.find_element(By.ID, 'id_enable_password').send_keys('enable123' + Keys.RETURN)
+
+        msg = self._get_alert_success_text(self.driver)
+        self.assertTrue('success' in msg)
+
+    def test_viewing_ci(self):
+        ci = CI.objects.get(pk=3)
+        self.driver.get(f'{self.live_server_url}/{app_name}/ci/3')
+        h1 = self.driver.find_element(By.TAG_NAME, 'h1')
+        self.assertEqual(h1.text, str(ci))
+
+    def test_listing_cis(self):
+        self.driver.get(f'{self.live_server_url}/{app_name}/cis/0/')
+        h1 = self.driver.find_element(By.TAG_NAME, 'h1')
+        self.assertEqual(h1.text, 'Configuration Items Created')
+
+        cis = self.driver.find_elements(By.CSS_SELECTOR, 'td>a')
+        for hostname in cis:
+            hostnames = ('SW-CORE', 'SW-FL1', 'SW-FL2')
+            self.assertTrue(hostname.text in hostnames)
+
+    def test_view_ci_from_listing(self):
+        self.driver.get(f'{self.live_server_url}/{app_name}/cis/0/')
+        ci_origin = self.driver.find_element(By.CSS_SELECTOR, 'td>a')
+        ci_hostname_origin = ci_origin.text
+        ci_origin.click()
+        ci_hostname_target = self.driver.find_element(By.ID, 'hostname')
+        self.assertEqual(ci_hostname_target.text, ci_hostname_origin)

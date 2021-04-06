@@ -92,7 +92,7 @@ class Circuit(models.Model):
 class Contract(models.Model):
     """Model representing a Contract applied to a CI"""
 
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     begin = models.DateField()
     end = models.DateField()
     description = models.TextField()
