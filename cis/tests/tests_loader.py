@@ -3,7 +3,7 @@ from collections import namedtuple
 from openpyxl import Workbook
 from django.test import TestCase
 
-from ..models import Client, Site, Contract, Manufacturer
+from ..models import Client, Place, Contract, Manufacturer
 from ..loader import CILoader
 from ..cis_mapping import CLIENT_CELL, SUMMARY_SHEET, CIS_SHEET, \
     APPLIANCES_SHEET
@@ -33,7 +33,7 @@ class CILoaderTest(TestCase):
         keys = {'NY1', 'NY2', 'SP', 'BH'}
         for k, site in sites.items():
             self.assertIn(k, keys)
-            self.assertIsInstance(site, Site)
+            self.assertIsInstance(site, Place)
 
     def test_return_correct_contract_objects(self):
         contracts = self.loader.contracts

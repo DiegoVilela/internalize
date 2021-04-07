@@ -1,22 +1,5 @@
 from django.db import models
 from django.urls import reverse
-from django.contrib.auth.models import AbstractUser, UserManager
-
-
-class UserClientManager(UserManager):
-    def get_queryset(self):
-        return super().get_queryset().select_related('client')
-
-
-class User(AbstractUser):
-    client = models.OneToOneField('Client', on_delete=models.CASCADE, blank=True, null=True)
-    # modify the user manager's initial QuerySet to join the Client
-    # https://docs.djangoproject.com/en/3.1/topics/db/managers/#modifying-a-manager-s-initial-queryset
-    objects = UserClientManager()
-
-    @property
-    def is_approved(self):
-        return bool(self.client) or self.is_superuser
 
 
 class Company(models.Model):
@@ -45,7 +28,7 @@ class Client(Company):
         return self.name
 
 
-class Site(models.Model):
+class Place(models.Model):
     """Model representing a location of a Client"""
 
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
@@ -56,13 +39,13 @@ class Site(models.Model):
         return f"{self.client} | {self.name}"
 
     def get_absolute_url(self):
-        return reverse('cis:site_update', args=[self.pk])
+        return reverse('cis:place_update', args=[self.pk])
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
                 fields=['client', 'name'],
-                name='unique_client_site_name'
+                name='unique_client_place_name'
             )
         ]
 
@@ -76,9 +59,9 @@ class Manufacturer(Company):
 
 
 class Circuit(models.Model):
-    """Model representing a Circuit of a ISP installed in a Site"""
+    """Model representing a Circuit of a ISP installed in a Place"""
 
-    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    place = models.ForeignKey(Place, on_delete=models.CASCADE)
     isp = models.ForeignKey(ISP, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=50)
     bandwidth = models.CharField(max_length=10)
@@ -149,7 +132,7 @@ class CI(Credential):
         (2, 'APPROVED'),
     )
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    place = models.ForeignKey(Place, on_delete=models.CASCADE)
     appliances = models.ManyToManyField(Appliance)
     hostname = models.CharField(max_length=50)
     ip = models.GenericIPAddressField()
@@ -160,7 +143,7 @@ class CI(Credential):
     status = models.PositiveSmallIntegerField(choices=STATUS_OPTIONS, default=0)
 
     def __str__(self):
-        return f"{self.site} | {self.hostname} | {self.ip}"
+        return f"{self.place} | {self.hostname} | {self.ip}"
 
     def get_absolute_url(self):
         return reverse('cis:ci_detail', args=[self.pk])
@@ -180,7 +163,7 @@ class CIPack(models.Model):
     It is used to send CIs to production
     """
 
-    responsible = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    responsible = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True)
     sent_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     items = models.ManyToManyField(CI)
     approved = models.BooleanField(default=False)

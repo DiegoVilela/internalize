@@ -8,7 +8,7 @@ from django.http import Http404
 from django.forms import inlineformset_factory
 from django.core.exceptions import PermissionDenied
 
-from .models import CI, Client, Site, Manufacturer, Appliance, CIPack
+from .models import CI, Client, Place, Manufacturer, Appliance, CIPack
 from .forms import UploadCIsForm, CIForm, ApplianceForm
 from .loader import CILoader
 from .mixins import UserApprovedMixin, AddClientMixin
@@ -22,39 +22,39 @@ def homepage(request):
     return render(request, 'homepage.html')
 
 
-class SiteCreateView(UserApprovedMixin, SuccessMessageMixin, AddClientMixin, CreateView):
-    model = Site
+class PlaceCreateView(UserApprovedMixin, SuccessMessageMixin, AddClientMixin, CreateView):
+    model = Place
     fields = ('name', 'description')
-    success_message = "The site %(name)s was created successfully."
+    success_message = "The place %(name)s was created successfully."
 
 
-class SiteUpdateView(UserApprovedMixin, SuccessMessageMixin, UpdateView):
-    model = Site
+class PlaceUpdateView(UserApprovedMixin, SuccessMessageMixin, UpdateView):
+    model = Place
     fields = ('name', 'description')
-    queryset = Site.objects.select_related('client')
-    success_message = "The site %(name)s was updated successfully."
+    queryset = Place.objects.select_related('client')
+    success_message = "The place %(name)s was updated successfully."
 
 
 @login_required
-def manage_client_sites(request):
+def manage_client_places(request):
     if not request.user.is_approved: raise PermissionDenied()
 
     client = request.user.client
-    SiteInlineFormSet = inlineformset_factory(
-        Client, Site,
+    PlaceInlineFormSet = inlineformset_factory(
+        Client, Place,
         fields=('name', 'description'),
         extra=0,
     )
-    formset = SiteInlineFormSet(instance=client)
+    formset = PlaceInlineFormSet(instance=client)
 
     if request.method == 'POST':
-        formset = SiteInlineFormSet(request.POST, instance=client)
+        formset = PlaceInlineFormSet(request.POST, instance=client)
         if formset.is_valid():
             formset.save()
-            messages.success(request, "The sites were updated successfully.")
-            return redirect(reverse('cis:manage_client_sites'))
+            messages.success(request, "The places were updated successfully.")
+            return redirect(reverse('cis:manage_client_places'))
 
-    return render(request, 'cis/manage_client_sites.html', {
+    return render(request, 'cis/manage_client_places.html', {
         'formset': formset,
         'client': client,
     })
@@ -67,7 +67,7 @@ class CICreateView(UserApprovedMixin, SuccessMessageMixin, AddClientMixin, Creat
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # only sites of the user.client will be shown in the form
+        # only places of the user.client will be shown in the form
         kwargs.update({'client': self.request.user.client })
         return kwargs
 
@@ -78,17 +78,17 @@ class CIListView(UserApprovedMixin, ListView):
     def get_queryset(self):
         return CI.objects.filter(
             status=self.kwargs['status'],
-            site__client=self.request.user.client
+            place__client=self.request.user.client
         )
 
 
 class CIDetailView(UserApprovedMixin, DetailView):
     model = CI
-    queryset = CI.objects.select_related('site', 'contract')
+    queryset = CI.objects.select_related('place', 'contract')
 
     def get_object(self, **kwargs):
         object = super().get_object(**kwargs)
-        if object.site.client != self.request.user.client:
+        if object.place.client != self.request.user.client:
             # user authenticated but unauthorized
             raise Http404
         # user authenticated and authorized

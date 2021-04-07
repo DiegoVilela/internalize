@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.test import TestCase
 from django.shortcuts import reverse
 
-from cis.models import Client, Site, User, Appliance, Manufacturer, CI, Contract
+from cis.models import Client, Place, User, Appliance, Manufacturer, CI, Contract
 
 
 @dataclass
@@ -52,7 +52,7 @@ class SiteApplianceAndCIViewTest(TestCase):
         contract = create_contract()
         for letter in {'A', 'B'}:
             client = Client.objects.create(name=f'Client {letter}')
-            site = Site.objects.create(client=client, name=f'Site Client {letter}')
+            site = Place.objects.create(client=client, name=f'Site Client {letter}')
             appliance = create_appliance(client, manufacturer, letter)
             create_ci(client, site, letter, contract)
             user = User.objects.create_user(f'user_{letter}', password='faith', client=client)

@@ -1,7 +1,7 @@
 from collections import namedtuple
 from openpyxl import load_workbook
 from django.db import IntegrityError, transaction
-from .models import Client, Site, CI, Appliance, Site, Contract, Manufacturer
+from .models import Client, Place, CI, Appliance, Place, Contract, Manufacturer
 from .cis_mapping import CLIENT_CELL, SETUP_HOSTNAME, SETUP_IP, SETUP_DESCRIPTION, \
     SETUP_DEPLOYED, SETUP_BUSINESS_IMPACT, SITE, SITE_DESCRIPTION, CONTRACT, \
     CONTRACT_BEGIN, CONTRACT_END, CONTRACT_DESCRIPTION, CREDENTIAL_USERNAME, \
@@ -68,7 +68,7 @@ class CILoader:
         if row[SITE] in self.sites:
             return self.sites[row[SITE]]
         else:
-            self.sites[row[SITE]], created = Site.objects.get_or_create(
+            self.sites[row[SITE]], created = Place.objects.get_or_create(
                 name=row[SITE],
                 description=row[SITE_DESCRIPTION],
                 client=self.client

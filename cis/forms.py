@@ -1,12 +1,6 @@
 from django import forms
-from django_registration.forms import RegistrationForm
 
-from .models import User, CI, Site, Appliance
-
-
-class UserForm(RegistrationForm):
-    class Meta(RegistrationForm.Meta):
-        model = User
+from .models import CI, Place, Appliance
 
 
 class UploadCIsForm(forms.Form):
@@ -23,8 +17,8 @@ class CIForm(forms.ModelForm):
         self.fields['appliances'] = forms.ModelMultipleChoiceField(
             queryset=Appliance.objects.filter(client=self.client)
         )
-        self.fields['site'] = forms.ModelChoiceField(
-            queryset=Site.objects.filter(client=self.client)
+        self.fields['place'] = forms.ModelChoiceField(
+            queryset=Place.objects.filter(client=self.client)
         )
 
     class Meta:

@@ -29,12 +29,12 @@
         </div>
       </li>
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="sitesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Sites
+        <a class="nav-link dropdown-toggle" href="#" id="placesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Places
         </a>
-        <div class="dropdown-menu" aria-labelledby="sitesDropdown">
-          <a class="dropdown-item" href="{% url 'cis:site_create' %}">Add</a>
-          <a class="dropdown-item" href="{% url 'cis:manage_client_sites' %}">All</a>
+        <div class="dropdown-menu" aria-labelledby="placesDropdown">
+          <a class="dropdown-item" href="{% url 'cis:place_create' %}">Add</a>
+          <a class="dropdown-item" href="{% url 'cis:manage_client_places' %}">All</a>
         </div>
       </li>
       <li class="nav-item">
@@ -49,14 +49,14 @@
         <span class="nav-link">{{ user }}</span>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+        <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
       </li>
       {% else %}
       <li class="nav-item">
-        <a class="nav-link" href="{% url 'django_registration_register' %}">Register</a>
+        <a class="nav-link" href="{% url 'account_signup' %}">Register</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{% url 'login' %}">Login</a>
+        <a class="nav-link" href="{% url 'account_login' %}">Login</a>
       </li>
       {% endif %}
     </ul>

@@ -2,7 +2,7 @@ from django.shortcuts import reverse
 from django.test import TestCase
 from django.db.utils import IntegrityError
 
-from ..models import User, Client, Site, Manufacturer, Contract, Appliance, CI
+from ..models import User, Client, Place, Manufacturer, Contract, Appliance, CI
 
 
 CLIENT_NAME = 'The Client'
@@ -53,20 +53,20 @@ class SiteTest(TestCase):
     fixtures = ['data_models.json']
 
     def test_as_string_returns_client_plus_site_name(self):
-        site = Site.objects.get(pk=1)
+        site = Place.objects.get(pk=1)
         self.assertEqual(str(site), f'{CLIENT_NAME} | {SITE_NAME}')
 
     def test_duplicate_name_by_client_raises_exception(self):
         client = Client.objects.get(pk=1)
         with self.assertRaises(IntegrityError):
-            Site.objects.create(name=SITE_NAME, client=client)
+            Place.objects.create(name=SITE_NAME, client=client)
 
     def test_duplicate_name_different_client_is_ok(self):
         client = Client.objects.create(name='Different Client')
-        self.assertIsNotNone(Site.objects.create(name=SITE_NAME, client=client))
+        self.assertIsNotNone(Place.objects.create(name=SITE_NAME, client=client))
 
     def test_absolute_url_returns_correct_url(self):
-        site = Site.objects.get(pk=1)
+        site = Place.objects.get(pk=1)
         self.assertEqual(
             site.get_absolute_url(),
             reverse('cis:site_update', args=[site.pk])

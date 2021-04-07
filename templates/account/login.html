@@ -22,7 +22,7 @@
       {% endif %}
     {% endif %}
 
-    <form method="post" action="{% url 'login' %}" class="form-sign">
+    <form method="post" action="{% url 'account_login' %}" class="form-sign">
       {% csrf_token %}
       {{ form|crispy }}
       <input class="btn btn-primary my-4 float-right" type="submit" value="Login" />

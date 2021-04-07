@@ -1,7 +1,7 @@
 """internalize URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/3.1/topics/http/urls/
+    https://docs.djangoproject.com/en/3.2/topics/http/urls/
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -16,22 +16,13 @@ Including another URLconf
 import debug_toolbar
 from django.contrib import admin
 from django.urls import path, include
-from django_registration.backends.activation.views import RegistrationView
 
-from cis.forms import UserForm
 from cis.views import homepage
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('cis/', include('cis.urls')),
+    path('accounts/', include('allauth.urls')),
     path('', homepage, name='homepage'),
-    path('accounts/register/',
-         RegistrationView.as_view(
-             form_class=UserForm
-         ),
-         name='django_registration_register',
-         ),
-    path('accounts/', include('django_registration.backends.activation.urls')),
-    path('accounts/', include('django.contrib.auth.urls')),
+    path('cis/', include('cis.urls')),
     path('__debug__/', include(debug_toolbar.urls)),
 ]

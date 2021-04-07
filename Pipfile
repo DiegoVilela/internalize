@@ -6,10 +6,10 @@ name = "pypi"
 [packages]
 openpyxl = "*"
 Django = "*"
-django-registration = "*"
 django-crispy-forms = "*"
 django-extensions = "*"
 psycopg2-binary = "*"
+django-allauth = "*"
 
 [dev-packages]
 django-debug-toolbar = "*"
