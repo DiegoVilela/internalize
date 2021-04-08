@@ -13,7 +13,7 @@
     "pk": 1,
     "fields": {
         "client": 1,
-        "site": 1,
+        "place": 1,
         "appliances": [1, 2],
         "hostname": "SW-CORE",
         "ip": "10.10.20.20",
@@ -35,7 +35,7 @@
     "pk": 2,
     "fields": {
         "client": 1,
-        "site": 2,
+        "place": 2,
         "appliances": [3],
         "hostname": "SW-FL1",
         "ip": "10.10.20.30",
@@ -57,7 +57,7 @@
     "pk": 3,
     "fields": {
         "client": 1,
-        "site": 3,
+        "place": 3,
         "appliances": [3],
         "hostname": "SW-FL2",
         "ip": "10.10.20.40",

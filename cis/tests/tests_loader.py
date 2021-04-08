@@ -29,7 +29,7 @@ class CILoaderTest(TestCase):
         self.assertEqual(self.loader.client.name, CLIENT_NAME)
 
     def test_return_correct_site_objects(self):
-        sites = self.loader.sites
+        sites = self.loader.places
         keys = {'NY1', 'NY2', 'SP', 'BH'}
         for k, site in sites.items():
             self.assertIn(k, keys)

@@ -5,7 +5,8 @@ from django.utils import timezone
 from django.test import TestCase
 from django.shortcuts import reverse
 
-from cis.models import Client, Place, User, Appliance, Manufacturer, CI, Contract
+from ..models import Client, Place, Appliance, Manufacturer, CI, Contract
+from accounts.models import User
 
 
 @dataclass
@@ -13,7 +14,7 @@ class ListInfo:
     """
     Wraps the details of each test.
 
-    Applied to Site, Appliance, and CI.
+    Applied to Place, Appliance, and CI.
     """
 
     message: str
@@ -31,12 +32,13 @@ class ListInfo:
         return f"{self.lookup_text}{'B' if self.letter == 'A' else 'A'}"
 
 
-class SiteApplianceAndCIViewTest(TestCase):
+class PlaceApplianceAndCIViewTest(TestCase):
     """
-    Test CI, Site and Appliance views.
+    Test CI, Place and Appliance views.
     """
+
     users = {}
-    sites = {}
+    places = {}
     appliances = {}
 
     @classmethod
@@ -44,7 +46,7 @@ class SiteApplianceAndCIViewTest(TestCase):
         """
         Set up the database to be used in all testes in this class.
 
-        Client A and Client B will have their respective User, CI, and Site.
+        Client A and Client B will have their respective User, CI, and Place.
         cls.users = {'a': user_A, 'b': user_B}
         """
 
@@ -52,24 +54,24 @@ class SiteApplianceAndCIViewTest(TestCase):
         contract = create_contract()
         for letter in {'A', 'B'}:
             client = Client.objects.create(name=f'Client {letter}')
-            site = Place.objects.create(client=client, name=f'Site Client {letter}')
+            place = Place.objects.create(client=client, name=f'Place Client {letter}')
             appliance = create_appliance(client, manufacturer, letter)
-            create_ci(client, site, letter, contract)
+            create_ci(client, place, letter, contract)
             user = User.objects.create_user(f'user_{letter}', password='faith', client=client)
             cls.users.update({letter: user})
-            cls.sites.update({letter: site})
+            cls.places.update({letter: place})
             cls.appliances.update({letter: appliance})
             cls.manufacturer = manufacturer
             cls.contract = contract
 
         # Maps the details of the tests applied to
-        # Site, Appliance, and, CI list views, respectively.
+        # Place, Appliance, and, CI list views, respectively.
         cls.list_details = {
-            reverse('cis:manage_client_sites'): ListInfo(
-                'No site was found.',
+            reverse('cis:manage_client_places'): ListInfo(
+                'No place was found.',
                 'formset',
-                'cis/manage_client_sites.html',
-                'Site Client ',
+                'cis/manage_client_places.html',
+                'Place Client ',
             ),
             reverse('cis:appliance_list'): ListInfo(
                 'No appliance was found.',
@@ -91,7 +93,7 @@ class SiteApplianceAndCIViewTest(TestCase):
         for k, user in self.users.items():
             self.client.force_login(user)
 
-            # test Site, Appliance, and CI
+            # test Place, Appliance, and CI
             for url, test in self.list_details.items():
                 test.letter = k
                 response = self.client.get(url)
@@ -109,7 +111,7 @@ class SiteApplianceAndCIViewTest(TestCase):
         user.save()
         self.client.force_login(user)
 
-        # test Site, Appliance, and CI
+        # test Place, Appliance, and CI
         for url in self.list_details.keys():
             response = self.client.get(url)
             self.assertIsNone(response.context)
@@ -120,7 +122,7 @@ class SiteApplianceAndCIViewTest(TestCase):
         user = User.objects.create_user(f'user_c', password='faith', client=client)
         self.client.force_login(user)
 
-        # test Site, Appliance, and CI
+        # test Place, Appliance, and CI
         for url, test in self.list_details.items():
             response = self.client.get(url)
             self.assertContains(response, test.message, count=1)
@@ -133,10 +135,10 @@ class SiteApplianceAndCIViewTest(TestCase):
         # map urls to info that needs to be checked
         CreateInfo = namedtuple('CreateInfo', ['data', 'template_name', 'contains'])
         details = {
-            'cis:site_create': CreateInfo(
-                {'name': "New Site"},
-                'cis/site_form.html',
-                ['The site New Site was created successfully.'],
+            'cis:place_create': CreateInfo(
+                {'name': "New Place"},
+                'cis/place_form.html',
+                ['The place New Place was created successfully.'],
             ),
             'cis:appliance_create': CreateInfo(
                 {
@@ -150,7 +152,7 @@ class SiteApplianceAndCIViewTest(TestCase):
             ),
             'cis:ci_create': CreateInfo(
                 {
-                    'site': self.sites['A'].id,
+                    'place': self.places['A'].id,
                     'appliances': (self.appliances['A'].id,),
                     'hostname': 'NEW_HOST',
                     'ip': '10.10.10.254',
@@ -163,7 +165,7 @@ class SiteApplianceAndCIViewTest(TestCase):
                 ['NEW_HOST', self.appliances['A'].serial_number],
             )
         }
-        # test Site, Appliance, and CI
+        # test Place, Appliance, and CI
         for url, info in details.items():
             response = self.client.post(reverse(url), info.data, follow=True)
             self.assertEqual(response.status_code, 200)
@@ -191,10 +193,10 @@ def create_contract():
     )
 
 
-def create_ci(client, site, letter, contract):
+def create_ci(client, place, letter, contract):
     CI.objects.create(
         client=client,
-        site=site,
+        place=place,
         hostname=f'HOST_{letter}',
         ip='10.10.20.20',
         description=f'Configuration Item {letter}',

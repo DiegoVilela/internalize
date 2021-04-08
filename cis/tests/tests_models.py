@@ -2,39 +2,13 @@ from django.shortcuts import reverse
 from django.test import TestCase
 from django.db.utils import IntegrityError
 
-from ..models import User, Client, Place, Manufacturer, Contract, Appliance, CI
+from ..models import Client, Place, Manufacturer, Contract, Appliance, CI
 
 
 CLIENT_NAME = 'The Client'
-SITE_NAME = 'Main'
+PLACE_NAME = 'Main'
 MANUFACTURER = 'Cisco'
 CONTRACT_NAME = 'BR-001'
-
-
-class UserTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.username = 'new_user'
-        cls.user = User.objects.create_user(username=cls.username)
-
-    def test_is_approved_returns_true_when_user_has_client(self):
-        client = Client.objects.create(name='New Client')
-        self.user.client = client
-        self.assertTrue(self.user.is_approved)
-
-    def test_is_approved_returns_false_when_user_has_no_client(self):
-        self.user.client = None
-        self.assertFalse(self.user.is_approved)
-
-    def test_user_as_string_returns_username(self):
-        self.assertEqual(str(self.user), self.username)
-
-    def test_duplicate_name_raises_exception(self):
-        with self.assertRaises(IntegrityError):
-            User.objects.create(username=self.username)
-
-    def test_object_is_of_user_type(self):
-        self.assertIsInstance(self.user, User)
 
 
 class ClientTest(TestCase):
@@ -49,27 +23,27 @@ class ClientTest(TestCase):
             Client.objects.create(name=CLIENT_NAME)
 
 
-class SiteTest(TestCase):
+class PlaceTest(TestCase):
     fixtures = ['data_models.json']
 
-    def test_as_string_returns_client_plus_site_name(self):
-        site = Place.objects.get(pk=1)
-        self.assertEqual(str(site), f'{CLIENT_NAME} | {SITE_NAME}')
+    def test_as_string_returns_client_plus_place_name(self):
+        place = Place.objects.get(pk=1)
+        self.assertEqual(str(place), f'{CLIENT_NAME} | {PLACE_NAME}')
 
     def test_duplicate_name_by_client_raises_exception(self):
         client = Client.objects.get(pk=1)
         with self.assertRaises(IntegrityError):
-            Place.objects.create(name=SITE_NAME, client=client)
+            Place.objects.create(name=PLACE_NAME, client=client)
 
     def test_duplicate_name_different_client_is_ok(self):
         client = Client.objects.create(name='Different Client')
-        self.assertIsNotNone(Place.objects.create(name=SITE_NAME, client=client))
+        self.assertIsNotNone(Place.objects.create(name=PLACE_NAME, client=client))
 
     def test_absolute_url_returns_correct_url(self):
-        site = Place.objects.get(pk=1)
+        place = Place.objects.get(pk=1)
         self.assertEqual(
-            site.get_absolute_url(),
-            reverse('cis:site_update', args=[site.pk])
+            place.get_absolute_url(),
+            reverse('cis:place_update', args=[place.pk])
         )
 
 
@@ -124,7 +98,7 @@ class CITest(TestCase):
         ci = CI.objects.get(pk=1)
         self.assertEqual(
             str(ci),
-            f'{CLIENT_NAME} | {SITE_NAME} | {ci.hostname} | {ci.ip}'
+            f'{CLIENT_NAME} | {PLACE_NAME} | {ci.hostname} | {ci.ip}'
         )
 
     def test_unique_constraint_raises_exception(self):

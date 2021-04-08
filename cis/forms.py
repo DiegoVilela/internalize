@@ -9,7 +9,7 @@ class UploadCIsForm(forms.Form):
 
 class CIForm(forms.ModelForm):
     appliances = forms.ModelMultipleChoiceField(queryset=None)
-    site = forms.ModelChoiceField(queryset=None)
+    place = forms.ModelChoiceField(queryset=None)
 
     def __init__(self, *args, **kwargs):
         self.client = kwargs.pop('client')

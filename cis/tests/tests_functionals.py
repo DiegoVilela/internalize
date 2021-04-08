@@ -5,6 +5,7 @@ Requires Selenium and geckodriver.
 """
 
 from django.conf import settings
+from django.test import tag
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.common.keys import Keys
@@ -13,11 +14,12 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 
-from ..models import User, Client, CI
+from accounts.models import User
+from ..models import Client, CI
 from ..urls import app_name
 
-USERNAME = 'user1'
-PASSWORD = '123'
+LOGIN = 'user1@example.com'
+PASSWORD = '123456'
 SESSION_COOKIE = settings.SESSION_COOKIE_NAME
 
 
@@ -65,19 +67,18 @@ class CommonTestMixin:
         return msg.text
 
 
+@tag('functional')
 class LoginTest(CommonTestMixin, StaticLiveServerTestCase):
-    fixtures = None
 
     def setUp(self):
         pass
 
     def test_login_unapproved_user_shows_alert(self):
-        User.objects.create_user(
-            username='user1',
-            email='user1@example.com',
-            password=PASSWORD,
-        )
-        self._login_user('user1')
+        user = User.objects.get(pk=1)
+        user.client = None
+        user.save()
+
+        self._login_user(LOGIN)
         message = self.driver.find_element(By.CSS_SELECTOR, '.alert-warning')
         self.assertEqual(
             'Your account needs to be approved. Please contact you Account Manager.',
@@ -86,72 +87,69 @@ class LoginTest(CommonTestMixin, StaticLiveServerTestCase):
         self._logout()
 
     def test_login_approved_user_does_not_show_alert(self):
-        User.objects.create_user(
-            username='user2',
-            email='user2@example.com',
-            password=PASSWORD,
-            client=Client.objects.create(name='The Client'),
-        )
-        self._login_user('user2')
+        self._login_user(LOGIN)
         with self.assertRaises(NoSuchElementException):
             self.driver.find_element(By.CSS_SELECTOR, '.alert-warning')
         home = self.driver.find_element(By.TAG_NAME, 'h1')
         self.assertEqual(home.text, 'Homepage')
         self._logout()
 
-    def _login_user(self, username):
+    def _login_user(self, email):
         self.driver.get(f'{self.live_server_url}/accounts/login/')
-        username_input = self.driver.find_element(By.ID, 'id_username')
-        username_input.send_keys(username)
+        username_input = self.driver.find_element(By.ID, 'id_login')
+        username_input.send_keys(email)
         password_input = self.driver.find_element(By.ID, 'id_password')
         password_input.send_keys(PASSWORD)
-        self.driver.find_element(By.XPATH, '//input[@value="Login"]').click()
+        self.driver.find_element(By.XPATH, '//input[@type="submit"]').click()
 
     def _logout(self):
         self.driver.find_element(By.LINK_TEXT, 'Logout').click()
+        self.driver.find_element(By.XPATH, '//button[@type="submit"]').click()
 
 
+@tag('functional')
 class SiteTest(CommonTestMixin, StaticLiveServerTestCase):
-    """Test all features related to the Site model."""
+    """Test all features related to the Place model."""
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.fixtures.append('sites.json')
+        cls.fixtures.append('places.json')
 
-    def test_create_site(self):
-        self.driver.get(f'{self.live_server_url}/{app_name}/site/create/')
+    def test_create_place(self):
+        self.driver.get(f'{self.live_server_url}/{app_name}/place/create/')
         h1 = self.driver.find_element(By.TAG_NAME, 'h1')
-        self.assertEqual(h1.text, 'Site')
+        self.assertEqual(h1.text, 'Place')
 
-        new_site_name = 'Paulista'
+        new_place_name = 'Paulista'
         name = self.driver.find_element(By.ID, 'id_name')
-        name.send_keys(new_site_name)
+        name.send_keys(new_place_name)
         description = self.driver.find_element(By.ID, 'id_description')
-        description.send_keys('Site description' + Keys.ENTER)
+        description.send_keys('Place description' + Keys.ENTER)
 
         msg = self._get_alert_success_text(self.driver)
-        self.assertTrue(f'The site {new_site_name} was created successfully.' in msg)
+        self.assertTrue(f'The place {new_place_name} was created successfully.' in msg)
 
-    def test_viewing_site(self):
-        self.driver.get(f'{self.live_server_url}/{app_name}/site/1')
-        new_site = self.driver.find_element(By.ID, 'id_name')
-        self.assertEqual(new_site.get_attribute('value'), 'Site 1')
+    def test_viewing_place(self):
+        self.driver.get(f'{self.live_server_url}/{app_name}/place/1')
+        new_place = self.driver.find_element(By.ID, 'id_name')
+        self.assertEqual(new_place.get_attribute('value'), 'Place 1')
 
-    def test_listing_sites(self):
-        self.driver.get(f'{self.live_server_url}/{app_name}/sites/')
+    def test_listing_places(self):
+        self.driver.get(f'{self.live_server_url}/{app_name}/places/')
         for i in range(3):
-            site = self.driver.find_element(By.ID, f'id_site_set-{i}-name')
-            self.assertEqual(site.get_attribute('value'), f'Site {i+1}')
+            place = self.driver.find_element(By.ID, f'id_place_set-{i}-name')
+            self.assertEqual(place.get_attribute('value'), f'Place {i+1}')
 
-    def test_deleting_site(self):
-        self.driver.get(f'{self.live_server_url}/{app_name}/sites/')
-        self.driver.find_element(By.ID, 'id_site_set-0-DELETE').click()
+    def test_deleting_place(self):
+        self.driver.get(f'{self.live_server_url}/{app_name}/places/')
+        self.driver.find_element(By.ID, 'id_place_set-0-DELETE').click()
         self.driver.find_element(By.XPATH, '//input[@value="Save"]').click()
         msg = self._get_alert_success_text(self.driver)
-        self.assertTrue('The sites were updated successfully.' in msg)
+        self.assertTrue('The places were updated successfully.' in msg)
 
 
+@tag('functional')
 class ApplianceTest(CommonTestMixin, StaticLiveServerTestCase):
     """Test all features related to the Appliance model."""
 
@@ -203,13 +201,14 @@ class ApplianceTest(CommonTestMixin, StaticLiveServerTestCase):
         self.assertEqual(serial, serial_target.get_attribute('value'))
 
 
+@tag('functional')
 class CITest(CommonTestMixin, StaticLiveServerTestCase):
     """Test all features related to the CI model."""
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.fixtures.extend(['sites.json', 'appliances.json', 'cis.json'])
+        cls.fixtures.extend(['places.json', 'appliances.json', 'cis.json'])
 
     def test_create_ci(self):
         self.driver.get(f'{self.live_server_url}/{app_name}/ci/create/')
@@ -217,8 +216,8 @@ class CITest(CommonTestMixin, StaticLiveServerTestCase):
         self.assertEqual(h1.text, 'Configuration Item')
 
         self.driver.find_element(By.ID, 'id_hostname').send_keys('NEW_HOST')
-        site_select = Select(self.driver.find_element(By.ID, 'id_site'))
-        site_select.select_by_value('1')
+        place_select = Select(self.driver.find_element(By.ID, 'id_place'))
+        place_select.select_by_value('1')
         self.driver.find_element(By.ID, 'id_ip').send_keys('10.10.20.20')
         contract_select = Select(self.driver.find_element(By.ID, 'id_contract'))
         contract_select.select_by_index(1)

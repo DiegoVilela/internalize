@@ -1,25 +1,25 @@
 [
 {
-    "model": "cis.site",
+    "model": "cis.place",
     "pk": 1,
     "fields": {
-        "name": "Site 1",
+        "name": "Place 1",
         "client_id": 1
     }
 },
 {
-  "model": "cis.site",
+  "model": "cis.place",
   "pk": 2,
   "fields": {
-      "name": "Site 2",
+      "name": "Place 2",
       "client_id": 1
   }
 },
 {
-    "model": "cis.site",
+    "model": "cis.place",
     "pk": 3,
     "fields": {
-        "name": "Site 3",
+        "name": "Place 3",
         "client_id": 1
     }
 }

@@ -14,7 +14,7 @@ class CILoader:
     def __init__(self, file):
         self._workbook = load_workbook(file, read_only=True, data_only=True)
         self.client = self._get_client()
-        self.sites = {}
+        self.places = {}
         self.contracts = {}
         self.manufacturers = {}
         self.cis = []
@@ -42,7 +42,7 @@ class CILoader:
             description=row[SETUP_DESCRIPTION],
             deployed=bool(row[SETUP_DEPLOYED]),
             business_impact=row[SETUP_BUSINESS_IMPACT],
-            site=self._get_site(row),
+            place=self._get_site(row),
             contract=self._get_contract(row),
             username=row[CREDENTIAL_USERNAME],
             password=row[CREDENTIAL_PASSWORD],
@@ -65,15 +65,15 @@ class CILoader:
         return self.client
 
     def _get_site(self, row):
-        if row[SITE] in self.sites:
-            return self.sites[row[SITE]]
+        if row[SITE] in self.places:
+            return self.places[row[SITE]]
         else:
-            self.sites[row[SITE]], created = Place.objects.get_or_create(
+            self.places[row[SITE]], created = Place.objects.get_or_create(
                 name=row[SITE],
                 description=row[SITE_DESCRIPTION],
                 client=self.client
             )
-            return self.sites[row[SITE]]
+            return self.places[row[SITE]]
 
     def _get_contract(self, row):
         if row[CONTRACT] in self.contracts:

@@ -8,7 +8,7 @@ class UserClientManager(UserManager):
 
 
 class User(AbstractUser):
-    client = models.OneToOneField('cis.Client', on_delete=models.CASCADE, blank=True, null=True)
+    client = models.ForeignKey('cis.Client', on_delete=models.CASCADE, blank=True, null=True)
 
     # modify the user manager's initial QuerySet to join the Client
     # https://docs.djangoproject.com/en/3.1/topics/db/managers/#modifying-a-manager-s-initial-queryset

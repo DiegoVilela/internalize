@@ -7,7 +7,7 @@
     }
 },
 {
-    "model": "cis.site",
+    "model": "cis.place",
     "pk": 1,
     "fields": {
         "client": 1,
@@ -16,7 +16,7 @@
     }
 },
 {
-    "model": "cis.site",
+    "model": "cis.place",
     "pk": 2,
     "fields": {
         "client": 1,
@@ -67,7 +67,7 @@
     "pk": 1,
     "fields": {
         "client": 1,
-        "site": 1,
+        "place": 1,
         "hostname": "CORE",
         "ip": "10.10.20.20",
         "description": "Switch Core",
