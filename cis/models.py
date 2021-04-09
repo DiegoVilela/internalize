@@ -107,6 +107,9 @@ class Appliance(models.Model):
     def get_absolute_url(self):
         return reverse('cis:appliance_update', args=[self.pk])
 
+    class Meta:
+        ordering = ['serial_number']
+
 
 class Credential(models.Model):
     """Model representing access credentials of a Configuration Item"""
@@ -149,6 +152,7 @@ class CI(Credential):
         return reverse('cis:ci_detail', args=[self.pk])
 
     class Meta:
+        ordering = ['hostname']
         constraints = [
             models.UniqueConstraint(
                 fields=['client', 'hostname', 'ip', 'description'],

@@ -3,29 +3,42 @@
 {% block title %}Appliances{% endblock %}
 
 {% block content %}
-<h1 class="h5 my-4">Appliances</h1>
+<div class="row justify-content-md-center mt-4">
+    <div class="col-md-12">
+        <h1 class="h5">Appliances</h1>
+    </div>
+</div>
+
 
 {% if appliance_list %}
-<table class="table table-bordered table-hover" id="dataTable">
-    <thead>
-    <tr>
-        <th>Serial Number</th>
-        <th>Manufacturer</th>
-        <th>Model</th>
-        <th>Virtual</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for appliance in appliance_list %}
-        <tr>
-            <td><a href="{{ appliance.get_absolute_url }}">{{ appliance.serial_number }}</a></td>
-            <td>{{ appliance.manufacturer }}</td>
-            <td>{{ appliance.model }}</td>
-            <td>{{ appliance.virtual }}</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+    <div class="row justify-content-md-center mt-4">
+        <div class="col-md-12">
+            <table class="table table-bordered table-hover" id="dataTable">
+                <thead>
+                <tr>
+                    <th>Serial Number</th>
+                    <th>Manufacturer</th>
+                    <th>Model</th>
+                    <th>Virtual</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for appliance in appliance_list %}
+                    <tr>
+                        <td><a href="{{ appliance.get_absolute_url }}">{{ appliance.serial_number }}</a></td>
+                        <td>{{ appliance.manufacturer }}</td>
+                        <td>{{ appliance.model }}</td>
+                        <td>{{ appliance.virtual }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row justify-content-md-end align-items-md-center">
+        {% include 'cis/_pagination.html' %}
+    </div>
 {% else %}
 <p class="lead">No appliance was found.</p>
 {% endif %}

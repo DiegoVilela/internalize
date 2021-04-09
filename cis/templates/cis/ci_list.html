@@ -53,31 +53,7 @@
         <div class="col-md-auto float-left">
             <input class="btn btn-outline-primary" type="submit" value="Send to Production">
         </div>
-        <div class="col-md-auto">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-        </div>
-        <div class="col-md-auto">
-            <div class="btn-toolbar float-right" role="toolbar" aria-label="Toolbar with button groups">
-              <div class="btn-group mr-2" role="group" aria-label="First group">
-                {% if page_obj.has_previous %}
-                    <a href="?page=1" type="button" class="btn btn-secondary" title="First">
-                        <i class="bi bi-caret-left-fill"></i>
-                    </a>
-                    <a href="?page={{ page_obj.previous_page_number }}" type="button" class="btn btn-secondary" title="Previous">
-                        <i class="bi bi-caret-left"></i>
-                    </a>
-                {% endif %}
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}" type="button" class="btn btn-secondary" title="Next">
-                        <i class="bi bi-caret-right"></i>
-                    </a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}" type="button" class="btn btn-secondary" title="Last">
-                        <i class="bi bi-caret-right-fill"></i>
-                    </a>
-                {% endif %}
-              </div>
-            </div>
-        </div>
+        {% include 'cis/_pagination.html' %}
     </div>
 
 {% else %}

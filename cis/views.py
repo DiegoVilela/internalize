@@ -74,7 +74,7 @@ class CICreateView(UserApprovedMixin, SuccessMessageMixin, AddClientMixin, Creat
 
 class CIListView(UserApprovedMixin, ListView):
     model = CI
-    paginate_by = 2
+    paginate_by = 10
 
     def get_queryset(self):
         return CI.objects.filter(
@@ -109,6 +109,7 @@ class ManufacturerDetailView(UserApprovedMixin, DetailView):
 
 class ApplianceListView(UserApprovedMixin, ListView):
     model = Appliance
+    paginate_by = 10
 
     def get_queryset(self):
         return Appliance.objects.filter(client=self.request.user.client)
