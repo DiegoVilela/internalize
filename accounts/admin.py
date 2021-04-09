@@ -11,6 +11,26 @@ class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     list_select_related = ('client',)
+    list_display = (
+        'username',
+        'email',
+        'client',
+        'is_superuser',
+        'is_staff',
+        'is_active',
+        'date_joined',
+        'last_login',
+        'is_approved',
+    )
+    list_filter = (
+        'last_login',
+        'is_superuser',
+        'is_staff',
+        'is_active',
+        'date_joined',
+        'client',
+    )
+
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         (_('Client'), {'fields': ('client',)}),
