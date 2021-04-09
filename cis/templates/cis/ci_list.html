@@ -18,7 +18,7 @@
                 <table class="table table-bordered table-hover">
                     <thead>
                     <tr>
-                        <th>Include</th>
+                        <th><input id="js-toggler" type="checkbox" title="Deselect all" checked></th>
                         <th>Hostname</th>
                         <th>IP</th>
                         <th>Description</th>
@@ -29,7 +29,7 @@
                     <tbody>
                     {% for ci in ci_list %}
                         <tr>
-                            <td><input type="checkbox" name="cis" value="{{ ci.pk }}" checked></td>
+                            <td><input class="js-items" type="checkbox" name="cis_selected" value="{{ ci.pk }}" checked></td>
                             <td><a href="{% url 'cis:ci_detail' ci.pk %}">{{ ci.hostname }}</a></td>
                             <td>{{ ci.ip }}</td>
                             <td>{{ ci.description }}</td>
@@ -51,7 +51,7 @@
 
     <div class="row justify-content-md-end align-items-md-center">
         <div class="col-md-auto float-left">
-            <input class="btn btn-outline-primary" type="submit" value="Send to Production">
+            <input class="btn btn-outline-primary" type="submit" value="Send selected items to production">
         </div>
         {% include 'cis/_pagination.html' %}
     </div>
@@ -60,3 +60,4 @@
     <p class="lead">No configuration item was found.</p>
 {% endif %}
 {% endblock %}
+

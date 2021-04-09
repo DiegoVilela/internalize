@@ -153,7 +153,7 @@ def send_ci_pack(request):
     if request.method == 'POST':
         pack = CIPack(responsible=request.user)
         pack.save()
-        pack.items.set(request.POST.getlist('cis'))
+        pack.items.set(request.POST.getlist('cis_selected'))
 
         if pack.id:
             pack.send()
