@@ -55,8 +55,14 @@ class ApplianceAdmin(admin.ModelAdmin):
 
 @admin.register(Manufacturer)
 class ManufacturerAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('name', 'view_appliances')
     search_fields = ('name',)
+
+    @admin.display(description='Appliances')
+    def view_appliances(self, obj):
+        count = obj.appliance_set.count()
+        url = f'{reverse("admin:cis_appliance_changelist")}?manufacturer__id__exact={obj.pk}'
+        return format_html('<a href="{}">{} Appliances</a>', url, count)
 
 
 @admin.register(Contract)
@@ -129,5 +135,5 @@ class CIPackAdmin(admin.ModelAdmin):
     raw_id_fields = ('items',)
 
 
-admin.site.register(ISP)
-admin.site.register(Circuit)
+# admin.site.register(ISP)
+# admin.site.register(Circuit)
