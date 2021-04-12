@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
-from django.utils.http import urlencode
 
 from .models import (
     Client, Place, ISP, Circuit,
@@ -44,6 +43,12 @@ class ContractAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
+@admin.action(description='Mark selected CIs as approved')
+def approve_selected_cis(modeladmin, request, queryset):
+    queryset.update(status=2)
+    # todo Dispatch a signal to update the CIPack approved percentage.
+
+
 @admin.register(CI)
 class CIAdmin(admin.ModelAdmin):
     list_display = (
@@ -54,30 +59,25 @@ class CIAdmin(admin.ModelAdmin):
         'view_appliances',
         'deployed',
         'business_impact',
-        'contract',
         'status',
-        'username',
-        'password',
-        'enable_password',
-        'instructions',
+        'contract',
 
     )
-    list_filter = ('client', 'place', 'deployed', 'contract')
+    list_filter = ('status', 'client__name', 'place', 'deployed', 'contract')
+    readonly_fields = ('status',)
+    actions = [approve_selected_cis]
 
     def view_appliances(self, obj):
         count = obj.appliances.count()
-        url = (
-            reverse("admin:cis_appliance_changelist")
-            + "?"
-            + urlencode({'ci': obj.pk})
-        )
+        url = f'{reverse("admin:cis_appliance_changelist")}?ci__exact={obj.pk}'
         return format_html('<a href="{}">{} Appliances</a>', url, count)
 
 
 @admin.register(CIPack)
 class CIPackAdmin(admin.ModelAdmin):
     list_display = ('id', 'responsible', 'sent_at', 'approved')
-    list_filter = ('responsible', 'sent_at', 'approved')
+    list_filter = ('responsible', 'approved', 'sent_at')
+    readonly_fields = ('responsible', 'approved', 'sent_at')
     raw_id_fields = ('items',)
 
 

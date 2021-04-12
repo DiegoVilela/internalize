@@ -11,43 +11,44 @@
 </div>
 
 {% if ci_list %}
+    <form action="{% url 'cis:ci_pack_send' %}" method="post">
+    {% csrf_token %}
+
     <div class="row justify-content-md-center mt-4">
         <div class="col-md-12">
-            <form action="{% url 'cis:ci_pack_send' %}" method="post">
-                {% csrf_token %}
-                <table class="table table-bordered table-hover">
-                    <thead>
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th><input id="js-toggler" type="checkbox" title="Deselect all" checked></th>
+                    <th>Hostname</th>
+                    <th>IP</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Appliances</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for ci in ci_list %}
                     <tr>
-                        <th><input id="js-toggler" type="checkbox" title="Deselect all" checked></th>
-                        <th>Hostname</th>
-                        <th>IP</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th>Appliances</th>
+                        <td><input class="js-items" type="checkbox" name="cis_selected" value="{{ ci.pk }}" checked></td>
+                        <td><a href="{% url 'cis:ci_detail' ci.pk %}">{{ ci.hostname }}</a></td>
+                        <td>{{ ci.ip }}</td>
+                        <td>{{ ci.description }}</td>
+                        <td>{{ ci.get_status_display }}</td>
+                        <td>
+                            <ul class="list-unstyled">
+                            {% for appliance in ci.appliances.all %}
+                                <li>{{ appliance.serial_number }} {{ appliance.manufacturer }} {{ appliance.model }}</li>
+                            {% endfor %}
+                            </ul>
+                        </td>
                     </tr>
-                    </thead>
-                    <tbody>
-                    {% for ci in ci_list %}
-                        <tr>
-                            <td><input class="js-items" type="checkbox" name="cis_selected" value="{{ ci.pk }}" checked></td>
-                            <td><a href="{% url 'cis:ci_detail' ci.pk %}">{{ ci.hostname }}</a></td>
-                            <td>{{ ci.ip }}</td>
-                            <td>{{ ci.description }}</td>
-                            <td>{{ ci.get_status_display }}</td>
-                            <td>
-                                <ul class="list-unstyled">
-                                {% for appliance in ci.appliances.all %}
-                                    <li>{{ appliance.serial_number }} {{ appliance.manufacturer }} {{ appliance.model }}</li>
-                                {% endfor %}
-                                </ul>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </form>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+
 
     <div class="row justify-content-md-end align-items-md-center">
         <div class="col-md-auto float-left">
@@ -56,8 +57,9 @@
         {% include 'cis/_pagination.html' %}
     </div>
 
+    </form>
 {% else %}
     <p class="lead">No configuration item was found.</p>
 {% endif %}
-{% endblock %}
+{% endblock content %}
 

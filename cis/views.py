@@ -156,7 +156,7 @@ def send_ci_pack(request):
         pack.items.set(request.POST.getlist('cis_selected'))
 
         if pack.id:
-            pack.send()
+            pack.send_to_production()
             messages.success(request, 'Pack created.')
 
     return render(request, 'homepage.html')

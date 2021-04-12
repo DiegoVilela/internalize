@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.db import models
 from django.urls import reverse
 
@@ -170,9 +171,9 @@ class CIPack(models.Model):
     responsible = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True)
     sent_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     items = models.ManyToManyField(CI)
-    approved = models.BooleanField(default=False)
+    approved = models.PositiveSmallIntegerField('Approved (%)', default=0)
 
-    def send(self):
+    def send_to_production(self):
         for ci in self.items.all():
             ci.status = 1
             ci.save()

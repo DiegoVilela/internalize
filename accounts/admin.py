@@ -40,3 +40,7 @@ class CustomUserAdmin(UserAdmin):
         }),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
+
+    @admin.display(boolean=True, description='Approved')
+    def is_approved(self, obj):
+        return obj.is_approved
