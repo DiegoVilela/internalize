@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse
 
@@ -130,6 +131,11 @@ class CI(Credential):
     https://docs.djangoproject.com/en/stable/topics/db/models/#multiple-inheritance
     """
 
+    IMPACT_OPTIONS = (
+        (0, 'LOW'),
+        (1, 'MEDIUM'),
+        (2, 'HIGH'),
+    )
     STATUS_OPTIONS = (
         (0, 'CREATED'),
         (1, 'SENT'),
@@ -142,9 +148,17 @@ class CI(Credential):
     ip = models.GenericIPAddressField()
     description = models.CharField(max_length=255)
     deployed = models.BooleanField(default=False)
-    business_impact = models.CharField(max_length=10, default='low')
+    business_impact = models.PositiveSmallIntegerField(
+        choices=IMPACT_OPTIONS,
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(2)],
+    )
     contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, null=True)
-    status = models.PositiveSmallIntegerField(choices=STATUS_OPTIONS, default=0)
+    status = models.PositiveSmallIntegerField(
+        choices=STATUS_OPTIONS,
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(2)],
+    )
 
     def __str__(self):
         return f"{self.place} | {self.hostname} | {self.ip}"
