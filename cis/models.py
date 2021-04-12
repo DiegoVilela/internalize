@@ -132,14 +132,14 @@ class CI(Credential):
     """
 
     IMPACT_OPTIONS = (
-        (0, 'LOW'),
-        (1, 'MEDIUM'),
-        (2, 'HIGH'),
+        (0, 'low'),
+        (1, 'medium'),
+        (2, 'high'),
     )
     STATUS_OPTIONS = (
-        (0, 'CREATED'),
-        (1, 'SENT'),
-        (2, 'APPROVED'),
+        (0, 'created'),
+        (1, 'sent'),
+        (2, 'approved'),
     )
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     place = models.ForeignKey(Place, on_delete=models.CASCADE)

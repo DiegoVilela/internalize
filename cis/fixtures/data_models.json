@@ -72,7 +72,7 @@
         "ip": "10.10.20.20",
         "description": "Switch Core",
         "deployed": false,
-        "business_impact": "high",
+        "business_impact": 2,
         "contract": 1,
         "status": 0,
         "appliances": [

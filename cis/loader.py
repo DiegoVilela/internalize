@@ -2,8 +2,8 @@ from collections import namedtuple
 from openpyxl import load_workbook
 from django.db import IntegrityError, transaction
 from .models import Client, Place, CI, Appliance, Place, Contract, Manufacturer
-from .cis_mapping import CLIENT_CELL, SETUP_HOSTNAME, SETUP_IP, SETUP_DESCRIPTION, \
-    SETUP_DEPLOYED, SETUP_BUSINESS_IMPACT, SITE, SITE_DESCRIPTION, CONTRACT, \
+from .cis_mapping import CLIENT_CELL, HOSTNAME, IP, DESCRIPTION, \
+    DEPLOYED, BUSINESS_IMPACT, SITE, SITE_DESCRIPTION, CONTRACT, \
     CONTRACT_BEGIN, CONTRACT_END, CONTRACT_DESCRIPTION, CREDENTIAL_USERNAME, \
     CREDENTIAL_PASSWORD, CREDENTIAL_ENABLE_PASSWORD, CREDENTIAL_INSTRUCTIONS, \
     SUMMARY_SHEET, CIS_SHEET, APPLIANCES_SHEET, APPLIANCE_HOSTNAME, APPLIANCE_SERIAL_NUMBER, \
@@ -37,11 +37,11 @@ class CILoader:
     def _create_ci(self, row):
         return CI.objects.create(
             client=self.client,
-            hostname=row[SETUP_HOSTNAME],
-            ip=row[SETUP_IP],
-            description=row[SETUP_DESCRIPTION],
-            deployed=bool(row[SETUP_DEPLOYED]),
-            business_impact=row[SETUP_BUSINESS_IMPACT],
+            hostname=row[HOSTNAME],
+            ip=row[IP],
+            description=row[DESCRIPTION],
+            deployed=bool(row[DEPLOYED]),
+            business_impact=self._get_business_impact(row),
             place=self._get_site(row),
             contract=self._get_contract(row),
             username=row[CREDENTIAL_USERNAME],
@@ -54,7 +54,7 @@ class CILoader:
         appliances = set()
         appliances_sheet = self._workbook[APPLIANCES_SHEET]
         for appl_row in appliances_sheet.iter_rows(min_row=2, values_only=True):
-            if appl_row[APPLIANCE_HOSTNAME] == row[SETUP_HOSTNAME]:
+            if appl_row[APPLIANCE_HOSTNAME] == row[HOSTNAME]:
                 appliances.add(self._get_appliance(appl_row))
         return appliances
 
@@ -105,3 +105,9 @@ class CILoader:
                 name=name,
             )
             return self.manufacturers[name]
+
+    @staticmethod
+    def _get_business_impact(row) -> int:
+        model_choices = dict(CI.IMPACT_OPTIONS).items()
+        options = {value: key for key, value in model_choices}
+        return options.get(row[BUSINESS_IMPACT].lower())

@@ -1,17 +1,18 @@
 """
 Field names and their column location (zero-indexed) on the spreadsheet
 """
+
 # Client field in "summary" sheet
 SUMMARY_SHEET = 'summary'
 CLIENT_CELL = 'A1'
 
 CIS_SHEET = 'cis'
-# Setup fields in "cis" sheet
-SETUP_HOSTNAME = 0
-SETUP_IP = 1
-SETUP_DESCRIPTION = 2
-SETUP_DEPLOYED = 3
-SETUP_BUSINESS_IMPACT = 4
+# Fields in "cis" sheet
+HOSTNAME = 0
+IP = 1
+DESCRIPTION = 2
+DEPLOYED = 3
+BUSINESS_IMPACT = 4
 
 # Site fields in "cis" sheet
 SITE = 5
