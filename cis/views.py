@@ -1,3 +1,4 @@
+from django.db import DatabaseError
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.decorators import login_required
@@ -63,7 +64,7 @@ def manage_client_places(request):
 class CICreateView(UserApprovedMixin, SuccessMessageMixin, AddClientMixin, CreateView):
     model = CI
     form_class = CIForm
-    success_message = "The CI was updated successfully."
+    success_message = "The CI was created successfully."
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -151,12 +152,12 @@ def send_ci_pack(request):
     if not request.user.is_approved: raise PermissionDenied()
 
     if request.method == 'POST':
-        pack = CIPack(responsible=request.user)
-        pack.save()
-        pack.items.set(request.POST.getlist('cis_selected'))
-
-        if pack.id:
-            pack.send_to_production()
+        try:
+            pack = CIPack.objects.create(responsible=request.user)
+            ci_pks = request.POST.getlist('cis_selected')
+            pack.send_to_production(ci_pks)
             messages.success(request, 'Pack created.')
+        except DatabaseError:
+            raise DatabaseError('There was an error during the sending of the CIs to production.')
 
     return render(request, 'homepage.html')

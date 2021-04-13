@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 
 
 class Company(models.Model):
@@ -123,6 +124,34 @@ class Credential(models.Model):
     instructions = models.CharField(max_length=255, blank=True, null=True)
 
 
+class CIPack(models.Model):
+    """
+    Model representing a pack of CIs.
+
+    It is used to send CIs to production.
+    """
+
+    responsible = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True)
+    sent_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    approved = models.PositiveSmallIntegerField('Approved (%)', default=0)
+    approved_by = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='cipacks_approved',
+        limit_choices_to={'is_superuser': True}
+    )
+
+    def send_to_production(self, ci_pks):
+        cis = CI.objects.filter(pk__in=ci_pks)
+        self.ci_set.set(cis)
+        self.ci_set.update(status=1)
+
+    def __str__(self):
+        local_date = timezone.localtime(self.sent_at)
+        return f"{self.responsible} {local_date.strftime('%Y-%m-%d %H:%M:%S')}"
+
+
 class CI(Credential):
     """
     Model representing a Configuration Item.
@@ -159,6 +188,7 @@ class CI(Credential):
         default=0,
         validators=[MinValueValidator(0), MaxValueValidator(2)],
     )
+    pack = models.ForeignKey(CIPack, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return f"{self.place} | {self.hostname} | {self.ip}"
@@ -174,23 +204,3 @@ class CI(Credential):
                 name='unique_client_hostname_ip_description'
             )
         ]
-
-
-class CIPack(models.Model):
-    """Model representing a pack of CIs
-
-    It is used to send CIs to production
-    """
-
-    responsible = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True)
-    sent_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    items = models.ManyToManyField(CI)
-    approved = models.PositiveSmallIntegerField('Approved (%)', default=0)
-
-    def send_to_production(self):
-        for ci in self.items.all():
-            ci.status = 1
-            ci.save()
-
-    def __str__(self):
-        return f"{self.responsible.client} | {self.responsible} | {self.sent_at}"
