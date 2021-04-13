@@ -1,8 +1,11 @@
 from django.contrib import admin
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.db.models import QuerySet
 from django.urls import reverse
 from django.utils import timezone
+
+from accounts.models import User
 
 
 class Company(models.Model):
@@ -124,6 +127,18 @@ class Credential(models.Model):
     instructions = models.CharField(max_length=255, blank=True, null=True)
 
 
+class CIPackManager(models.Manager):
+
+    def update_approver(self, approver: User, qs: QuerySet):
+        packs = set()
+        for ci in qs.all():
+            packs.add(ci.pack)
+
+        for pack in packs:
+            pack.approved_by = approver
+            pack.save()
+
+
 class CIPack(models.Model):
     """
     Model representing a pack of CIs.
@@ -131,9 +146,10 @@ class CIPack(models.Model):
     It is used to send CIs to production.
     """
 
+    objects = CIPackManager()
+
     responsible = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True)
     sent_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    approved = models.PositiveSmallIntegerField('Approved (%)', default=0)
     approved_by = models.ForeignKey(
         'accounts.User',
         on_delete=models.SET_NULL,
@@ -142,10 +158,19 @@ class CIPack(models.Model):
         limit_choices_to={'is_superuser': True}
     )
 
+    @property
+    @admin.display(description='Approved (%)')
+    def percentage_of_cis_approved(self):
+        num_cis_approved = self.ci_set.filter(status=2).count()
+        return round((num_cis_approved / len(self)) * 100)
+
     def send_to_production(self, ci_pks):
         cis = CI.objects.filter(pk__in=ci_pks)
         self.ci_set.set(cis)
         self.ci_set.update(status=1)
+
+    def __len__(self):
+        return self.ci_set.count()
 
     def __str__(self):
         local_date = timezone.localtime(self.sent_at)

@@ -75,24 +75,11 @@ class ContractAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description', 'begin', 'end')
 
 
-def _update_pack_approved_percentage(pack: CIPack):
-    print(pack, 'pack')
-    num_cis_in_pack = pack.ci_set.count()
-    num_cis_approved = pack.ci_set.filter(status=2).count()
-    pack.approved = round((num_cis_approved / num_cis_in_pack) * 100)
-    pack.save()
-
-
 @admin.action(description='Mark selected CIs as approved')
 def approve_selected_cis(modeladmin, request, queryset: QuerySet):
     try:
         queryset.update(status=2)
-
-        for ci in queryset.all():
-            ci.pack.approved_by = request.user
-            # todo Handle CIs of different packs
-            _update_pack_approved_percentage(ci.pack)
-
+        CIPack.objects.update_approver(request.user, queryset)
     except DatabaseError:
         raise DatabaseError('There was an error during the approval of CIs.')
 
@@ -113,7 +100,7 @@ class CIAdmin(admin.ModelAdmin):
     )
     list_filter = ('status', 'client__name', 'place', 'deployed', 'contract')
     actions = [approve_selected_cis]
-    #readonly_fields = ('status',)
+    readonly_fields = ('status',)
     fieldsets = (
         ('Client', {'fields': ((), ('client', 'place',))}),
         ('Configuration Item', {'fields': (
@@ -131,7 +118,6 @@ class CIAdmin(admin.ModelAdmin):
     )
     filter_horizontal = ('appliances',)
     list_editable = (
-        'status',
         'place',
         'ip',
         'description',
@@ -149,9 +135,9 @@ class CIAdmin(admin.ModelAdmin):
 
 @admin.register(CIPack)
 class CIPackAdmin(admin.ModelAdmin):
-    list_display = ('sent_at', 'responsible', 'approved', 'approved_by')
-    list_filter = ('responsible', 'approved', 'sent_at')
-    readonly_fields = ('responsible', 'approved', 'sent_at')
+    list_display = ('sent_at', 'responsible', 'percentage_of_cis_approved', 'approved_by')
+    list_filter = ('responsible', 'sent_at')
+    readonly_fields = ('responsible', 'percentage_of_cis_approved', 'sent_at')
 
 
 # admin.site.register(ISP)
