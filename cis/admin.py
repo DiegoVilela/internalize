@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.db import DatabaseError
+from django.db import DatabaseError, transaction
 from django.db.models import QuerySet
 from django.urls import reverse
 from django.utils.html import format_html
@@ -15,6 +15,7 @@ from .models import (
 class ClientAdmin(admin.ModelAdmin):
     list_display = ('name', 'view_places')
     search_fields = ('name', 'place__name')
+    view_on_site = False
 
     @admin.display(description='Places')
     def view_places(self, obj):
@@ -51,8 +52,9 @@ class ApplianceAdmin(admin.ModelAdmin):
         'virtual',
     )
     list_filter = ('client', 'manufacturer', 'virtual')
-    list_editable = ('client', 'manufacturer', 'model', 'virtual')
+    list_editable = ('model', 'virtual')
     search_fields = ('serial_number', 'model', 'client__name', 'manufacturer__name')
+    autocomplete_fields = ('client', 'manufacturer')
 
 
 @admin.register(Manufacturer)
@@ -69,6 +71,7 @@ class ManufacturerAdmin(admin.ModelAdmin):
 
 @admin.register(Contract)
 class ContractAdmin(admin.ModelAdmin):
+    date_hierarchy = 'begin'
     list_display = ('name', 'begin', 'end', 'description')
     list_editable = ('begin', 'end', 'description')
     list_filter = ('begin', 'end')
@@ -77,9 +80,11 @@ class ContractAdmin(admin.ModelAdmin):
 
 @admin.action(description='Mark selected CIs as approved')
 def approve_selected_cis(modeladmin, request, queryset: QuerySet):
+    # todo Write test
     try:
-        queryset.update(status=2)
-        CIPack.objects.update_approver(request.user, queryset)
+        with transaction.atomic():
+            queryset.update(status=2)
+            CIPack.objects.update_approver(request.user, queryset)
     except DatabaseError:
         raise DatabaseError('There was an error during the approval of CIs.')
 
@@ -88,7 +93,8 @@ def approve_selected_cis(modeladmin, request, queryset: QuerySet):
 class CIAdmin(admin.ModelAdmin):
     list_display = (
         'hostname',
-        'place',
+        'client',
+        'view_place_name',
         'ip',
         'description',
         'deployed',
@@ -115,22 +121,28 @@ class CIAdmin(admin.ModelAdmin):
                 ('username', 'password', 'enable_password', 'instructions')),
             'classes': ('collapse',),
         }),
+        ('Management', {
+            'fields': ('status',),
+        })
     )
     filter_horizontal = ('appliances',)
     list_editable = (
-        'place',
         'ip',
         'description',
         'deployed',
         'business_impact',
-        'contract'
     )
+    list_select_related = ('contract', 'client', 'place', 'pack')
 
     @admin.display(description='Appliances')
     def view_appliances(self, obj):
         count = obj.appliances.count()
         url = f'{reverse("admin:cis_appliance_changelist")}?ci__exact={obj.pk}'
         return format_html('<a href="{}">{} Appliances</a>', url, count)
+
+    @admin.display(description='Place')
+    def view_place_name(self, obj):
+        return obj.place.name
 
 
 @admin.register(CIPack)
