@@ -103,7 +103,8 @@ class ManufacturerDetailView(UserApprovedMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['num_appliances'] = Appliance.objects.filter(
-            manufacturer=context['manufacturer']
+            manufacturer=context['manufacturer'],
+            client=self.request.user,
         ).count()
         return context
 
