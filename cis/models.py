@@ -27,6 +27,8 @@ class Company(models.Model):
 class Client(Company):
     """Model representing a Client company"""
 
+    search_fields = ('name',)
+
     def get_absolute_url(self):
         return reverse('cis:client_detail', args=[self.id])
 
@@ -62,6 +64,8 @@ class ISP(Company):
 
 class Manufacturer(Company):
     """Model representing a Manufacturer of a Configuration Item"""
+
+    search_fields = ('name',)
 
 
 class Circuit(models.Model):
@@ -130,6 +134,8 @@ class Credential(models.Model):
 class CIPackManager(models.Manager):
 
     def update_approver(self, approver: User, qs: QuerySet):
+        """Set the superuser who approved each CIPack"""
+
         packs = set()
         for ci in qs.all():
             packs.add(ci.pack)
