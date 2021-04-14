@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models import QuerySet
 from django.urls import reverse
 from django.utils import timezone
 
@@ -131,28 +130,12 @@ class Credential(models.Model):
     instructions = models.CharField(max_length=255, blank=True, null=True)
 
 
-class CIPackManager(models.Manager):
-
-    def update_approver(self, approver: User, qs: QuerySet):
-        """Set the superuser who approved each CIPack"""
-
-        packs = set()
-        for ci in qs.all():
-            packs.add(ci.pack)
-
-        for pack in packs:
-            pack.approved_by = approver
-            pack.save()
-
-
 class CIPack(models.Model):
     """
     Model representing a pack of CIs.
 
     It is used to send CIs to production.
     """
-
-    objects = CIPackManager()
 
     responsible = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True)
     sent_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)

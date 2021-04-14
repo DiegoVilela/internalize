@@ -1,9 +1,10 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db import DatabaseError, transaction
 from django.db.models import QuerySet
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+from django.utils.translation import ngettext
 
 from .models import (
     Client, Place, ISP, Circuit,
@@ -77,18 +78,6 @@ class ContractAdmin(admin.ModelAdmin):
     list_filter = ('begin', 'end')
     search_fields = ('name', 'description', 'begin', 'end')
 
-
-@admin.action(description='Mark selected CIs as approved')
-def approve_selected_cis(modeladmin, request, queryset: QuerySet):
-    # todo Write test
-    try:
-        with transaction.atomic():
-            queryset.update(status=2)
-            CIPack.objects.update_approver(request.user, queryset)
-    except DatabaseError:
-        raise DatabaseError('There was an error during the approval of CIs.')
-
-
 @admin.register(CI)
 class CIAdmin(admin.ModelAdmin):
     list_display = (
@@ -105,7 +94,7 @@ class CIAdmin(admin.ModelAdmin):
         'pack',
     )
     list_filter = ('status', 'client__name', 'place', 'deployed', 'contract')
-    actions = [approve_selected_cis]
+    actions = ['approve_selected_cis']
     readonly_fields = ('status',)
     fieldsets = (
         ('Client', {'fields': ((), ('client', 'place',))}),
@@ -143,6 +132,26 @@ class CIAdmin(admin.ModelAdmin):
     @admin.display(description='Place')
     def view_place_name(self, obj):
         return obj.place.name
+
+    @admin.action(description='Mark selected CIs as approved')
+    def approve_selected_cis(self, request, queryset: QuerySet):
+        # todo Write test
+        pack_ids = set(queryset.values_list('pack', flat=True))
+        try:
+            with transaction.atomic():
+                count = queryset.update(status=2)
+                CIPack.objects.filter(pk__in=pack_ids).update(approved_by=request.user)
+            self.message_user(
+                request,
+                ngettext(
+                    'The selected CI was approved successfully.',
+                    'The selected CIs were approved successfully.',
+                    count
+                ),
+                level=messages.SUCCESS,
+            )
+        except DatabaseError as e:
+            raise DatabaseError(f'An error occurred during the approval: {e}')
 
 
 @admin.register(CIPack)
