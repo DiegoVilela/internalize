@@ -12,11 +12,17 @@ from .models import (
 )
 
 
+class PlaceInline(admin.TabularInline):
+    model = Place
+    extra = 1
+
+
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
     list_display = ('name', 'view_places')
     search_fields = ('name', 'place__name')
     view_on_site = False
+    inlines = (PlaceInline,)
 
     @admin.display(description='Places')
     def view_places(self, obj):
