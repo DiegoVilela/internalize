@@ -18,6 +18,15 @@ AdminSite.site_header = SITE
 AdminSite.site_title = SITE
 
 
+class ClientLinkMixin:
+    """Add the Client name as a link"""
+
+    @admin.display(description='Client', ordering='client__name')
+    def client_link(self, obj):
+        url = f'{reverse("admin:cis_client_change", args={obj.client.pk})}'
+        return format_html('<a href="{}">{}</a>', url, obj.client.name)
+
+
 class PlaceInline(admin.TabularInline):
     model = Place
     extra = 1
@@ -52,21 +61,16 @@ class CIInline(admin.TabularInline):
 
 
 @admin.register(Place)
-class PlaceAdmin(admin.ModelAdmin):
+class PlaceAdmin(admin.ModelAdmin, ClientLinkMixin):
     list_display = ('name', 'client_link', 'description')
     list_filter = ('client',)
     list_editable = ('description',)
     search_fields = ('name', 'client__name', 'description')
     inlines = (CIInline,)
 
-    @admin.display(description='Client', ordering='client__name')
-    def client_link(self, obj):
-        url = f'{reverse("admin:cis_client_change", args={obj.client.pk})}'
-        return format_html('<a href="{}">{}</a>', url, obj.client.name)
-
 
 @admin.register(Appliance)
-class ApplianceAdmin(admin.ModelAdmin):
+class ApplianceAdmin(admin.ModelAdmin, ClientLinkMixin):
     list_display = (
         'serial_number',
         'client_link',
@@ -78,11 +82,6 @@ class ApplianceAdmin(admin.ModelAdmin):
     list_editable = ('model', 'virtual')
     search_fields = ('serial_number', 'model', 'client__name', 'manufacturer__name')
     autocomplete_fields = ('client', 'manufacturer')
-
-    @admin.display(description='Client', ordering='client__name')
-    def client_link(self, obj):
-        url = f'{reverse("admin:cis_client_change", args={obj.client.pk})}'
-        return format_html('<a href="{}">{}</a>', url, obj.client.name)
 
     @admin.display(description='Manufacturer', ordering='manufacturer__name')
     def manufacturer_link(self, obj):
@@ -120,7 +119,7 @@ class ContractAdmin(admin.ModelAdmin):
 
 
 @admin.register(CI)
-class CIAdmin(admin.ModelAdmin):
+class CIAdmin(admin.ModelAdmin, ClientLinkMixin):
     list_display = (
         'hostname',
         'client_link',
@@ -164,11 +163,6 @@ class CIAdmin(admin.ModelAdmin):
     )
     list_select_related = ('contract', 'client', 'place', 'pack')
 
-    @admin.display(description='Client', ordering='client__name')
-    def client_link(self, obj):
-        url = f'{reverse("admin:cis_client_change", args={obj.client.pk})}'
-        return format_html('<a href="{}">{}</a>', url, obj.client.name)
-
     @admin.display(description='Place', ordering='place__name')
     def place_link(self, obj):
         url = f'{reverse("admin:cis_place_change", args={obj.place.pk})}'
@@ -179,8 +173,6 @@ class CIAdmin(admin.ModelAdmin):
         count = obj.appliances.count()
         url = f'{reverse("admin:cis_appliance_changelist")}?ci__exact={obj.pk}'
         return format_html('<a href="{}">{} Appliances</a>', url, count)
-
-    # todo Move client_link to a mixin
 
     @admin.action(description='Mark selected CIs as approved')
     def approve_selected_cis(self, request, queryset: QuerySet):
