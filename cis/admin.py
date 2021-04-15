@@ -205,9 +205,11 @@ class CIAdmin(admin.ModelAdmin):
 
 @admin.register(CIPack)
 class CIPackAdmin(admin.ModelAdmin):
-    list_display = ('sent_at', 'responsible', 'percentage_of_cis_approved', 'approved_by')
+    FIELDS = ('sent_at', 'responsible', 'percentage_of_cis_approved', 'approved_by')
+
+    list_display = FIELDS
     list_filter = ('responsible', 'sent_at', 'approved_by')
-    readonly_fields = ('sent_at', 'responsible', 'percentage_of_cis_approved', 'approved_by')
+    readonly_fields = FIELDS
     inlines = (CIInline,)
 
 # admin.site.register(ISP)
