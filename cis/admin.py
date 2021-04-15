@@ -110,10 +110,12 @@ class ManufacturerAdmin(admin.ModelAdmin):
 
 @admin.register(Contract)
 class ContractAdmin(admin.ModelAdmin):
+    FIELDS = ('name', 'begin', 'end', 'description')
+
     date_hierarchy = 'begin'
-    list_display = ('name', 'begin', 'end')
+    list_display = FIELDS
     list_filter = ('begin', 'end')
-    search_fields = ('name', 'description', 'begin', 'end')
+    search_fields = FIELDS
     inlines = (CIInline,)
 
 
