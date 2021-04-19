@@ -1,0 +1,41 @@
+{% extends 'admin/base.html' %}
+
+{% block extrahead %}{{ block.super }}
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Dancing+Script&family=Ubuntu&display=swap');
+
+    :root {
+      --primary: #ececec;
+      --secondary: #f8f9fa;
+      --accent: #222;
+      --primary-fg: #222;
+
+      --header-color: #222;
+
+      --breadcrumbs-fg: var(--link-fg);
+      --breadcrumbs-link-fg: var(--primary-fg);
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --primary: #264b5d;
+            --secondary: #417690;
+
+            --breadcrumbs-link-fg: #e0e0e0;
+        }
+    }
+
+    body {
+        font-family: Ubuntu, serif;
+    }
+
+        #site-name {
+        font-family: 'Dancing Script', cursive;
+    }
+
+    #user-tools {
+        text-transform: none;
+    }
+</style>
+{% endblock %}
