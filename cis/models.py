@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from fernet_fields import EncryptedCharField
 
 from accounts.models import User
 
@@ -124,10 +125,10 @@ class Credential(models.Model):
     """Model representing access credentials of a Configuration Item"""
 
     credential_id = models.AutoField(primary_key=True)
-    username = models.CharField(max_length=50)
-    password = models.CharField(max_length=50)
-    enable_password = models.CharField(max_length=50)
-    instructions = models.CharField(max_length=255, blank=True, null=True)
+    username = EncryptedCharField(max_length=50)
+    password = EncryptedCharField(max_length=50)
+    enable_password = EncryptedCharField(max_length=50)
+    instructions = EncryptedCharField(max_length=255, blank=True, null=True)
 
 
 class CIPack(models.Model):
