@@ -1,3 +1,5 @@
+from typing import Tuple, NewType
+
 from django.contrib import admin
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -6,6 +8,9 @@ from django.utils import timezone
 from fernet_fields import EncryptedCharField
 
 from accounts.models import User
+
+
+CIId = NewType('CIId', int)
 
 
 class Company(models.Model):
@@ -150,11 +155,13 @@ class CIPack(models.Model):
 
     @property
     @admin.display(description='Approved (%)')
-    def percentage_of_cis_approved(self):
+    def percentage_of_cis_approved(self) -> int:
         num_cis_approved = self.ci_set.filter(status=2).count()
+        if not num_cis_approved:
+            return 0
         return round((num_cis_approved / len(self)) * 100)
 
-    def send_to_production(self, ci_pks):
+    def send_to_production(self, ci_pks: Tuple[CIId, ...]):
         cis = CI.objects.filter(pk__in=ci_pks)
         self.ci_set.set(cis)
         self.ci_set.update(status=1)

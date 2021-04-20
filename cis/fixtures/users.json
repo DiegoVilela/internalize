@@ -28,5 +28,20 @@
         "verified": true,
         "primary": true
     }
+},
+{
+    "model": "accounts.user",
+    "pk": 2,
+    "fields": {
+        "password": "pbkdf2_sha256$260000$4FilqvfSnCYScz5FWYhA20$59kZIDkCDdTCp3XL3/2LZxlFxNcsp6saJev2Sw9WULQ=",
+        "is_superuser": true,
+        "username": "admin",
+        "email": "admin@example.com",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2021-04-20T18:28:34.314Z",
+        "groups": [],
+        "user_permissions": []
+    }
 }
 ]

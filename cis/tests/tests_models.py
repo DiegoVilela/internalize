@@ -1,9 +1,10 @@
 from django.shortcuts import reverse
 from django.test import TestCase
 from django.db.utils import IntegrityError
+from django.utils import timezone
 
-from ..models import Client, Place, Manufacturer, Contract, Appliance, CI
-
+from accounts.models import User
+from ..models import Client, Place, Manufacturer, Contract, Appliance, CI, CIPack
 
 CLIENT_NAME = 'The Client'
 PLACE_NAME = 'Main'
@@ -123,3 +124,51 @@ class CITest(TestCase):
             ci.get_absolute_url(),
             reverse('cis:ci_detail', args=[ci.pk])
         )
+
+
+class CIPackTest(TestCase):
+    fixtures = ['data_models.json', 'users.json']
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.admin = User.objects.get(pk=2)
+        cls.user = User.objects.get(pk=1)
+        cls.pack = CIPack.objects.get(pk=1)
+        cls.cis = CI.objects.all()
+
+    def test_as_string_returns_responsible_plus_local_data(self):
+        self.assertEqual(
+            str(self.pack),
+            f"{self.user} 2021-04-20 09:25:38"  # UTC-3
+        )
+
+    def test_percentage_of_cis_approved(self):
+        # Approve 0 of 3 CIs
+        self.assertEqual(self.pack.percentage_of_cis_approved, 0)
+
+        # Approve 1 of 3 CIs
+        self.pack.ci_set.filter(pk__in=(1,)).update(status=2)
+        self.assertEqual(self.pack.percentage_of_cis_approved, 33)
+
+        # Approve 2 of 3 CIs
+        self.pack.ci_set.filter(pk__in=(1, 2)).update(status=2)
+        self.assertEqual(self.pack.percentage_of_cis_approved, 67)
+
+        # Approve 3 of 3 CIs
+        self.pack.ci_set.filter(pk__in=(1, 2, 3)).update(status=2)
+        self.assertEqual(self.pack.percentage_of_cis_approved, 100)
+
+    def test_approved_by_returns_the_right_superuser(self):
+        self.pack.approved_by = self.admin
+        self.pack.save()
+        self.assertEqual(self.pack.approved_by, self.admin)
+
+    def test_send_cis_to_production(self):
+        ci_pks = (ci.pk for ci in self.cis)
+        self.pack.send_to_production(ci_pks)
+
+        for ci in self.pack.ci_set.all():
+            self.assertEqual(ci.status, 1)
+
+    def test_len_returns_count_of_ci_set(self):
+        self.assertEqual(len(self.pack), 3)

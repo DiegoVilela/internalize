@@ -48,18 +48,62 @@
         "client": 1,
         "serial_number": "SERIAL1",
         "manufacturer": 1,
-        "model": "ABC123",
-        "virtual": false
+        "model": "ABC123"
+    }
+},
+{
+    "model": "cis.appliance",
+    "pk": 2,
+    "fields": {
+        "client": 1,
+        "serial_number": "SERIAL2",
+        "manufacturer": 1,
+        "model": "ABC456"
+    }
+},
+{
+    "model": "cis.appliance",
+    "pk": 3,
+    "fields": {
+        "client": 1,
+        "serial_number": "SERIAL3",
+        "manufacturer": 1,
+        "model": "ABC789"
     }
 },
 {
     "model": "cis.credential",
     "pk": 1,
     "fields": {
-        "username": "admin",
-        "password": "admin",
-        "enable_password": "enable",
-        "instructions": null
+        "username": "admin1",
+        "password": "admin1",
+        "enable_password": "enable1"
+    }
+},
+{
+    "model": "cis.credential",
+    "pk": 2,
+    "fields": {
+        "username": "admin2",
+        "password": "admin2",
+        "enable_password": "enable2"
+    }
+},
+{
+    "model": "cis.credential",
+    "pk": 3,
+    "fields": {
+        "username": "admin3",
+        "password": "admin3",
+        "enable_password": "enable3"
+    }
+},
+{
+    "model": "cis.cipack",
+    "pk": 1,
+    "fields": {
+        "responsible": 1,
+        "sent_at": "2021-04-20T12:25:38.137Z"
     }
 },
 {
@@ -71,13 +115,43 @@
         "hostname": "CORE",
         "ip": "10.10.20.20",
         "description": "Switch Core",
-        "deployed": false,
-        "business_impact": 2,
         "contract": 1,
-        "status": 0,
         "appliances": [
             1
-        ]
+        ],
+        "pack": 1
+    }
+},
+{
+    "model": "cis.ci",
+    "pk": 2,
+    "fields": {
+        "client": 1,
+        "place": 1,
+        "hostname": "FLW2",
+        "ip": "10.10.100.2",
+        "description": "Sw 2",
+        "contract": 1,
+        "appliances": [
+            2
+        ],
+        "pack": 1
+    }
+},
+{
+    "model": "cis.ci",
+    "pk": 3,
+    "fields": {
+        "client": 1,
+        "place": 1,
+        "hostname": "FLW3",
+        "ip": "10.10.100.3",
+        "description": "Sw 3",
+        "contract": 1,
+        "appliances": [
+            3
+        ],
+        "pack": 1
     }
 }
 ]
