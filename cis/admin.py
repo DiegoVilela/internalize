@@ -133,7 +133,7 @@ class CIAdmin(admin.ModelAdmin, ClientLinkMixin):
         'view_appliances',
         'pack',
     )
-    list_filter = ('status', 'client__name', 'place', 'deployed', 'contract')
+    list_filter = ('pack', 'status', 'client__name', 'place', 'deployed', 'contract')
     actions = ['approve_selected_cis']
     readonly_fields = ('status',)
     fieldsets = (

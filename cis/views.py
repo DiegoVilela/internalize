@@ -1,5 +1,6 @@
 from django.db import DatabaseError
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect
+from django.utils.translation import ngettext
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -53,7 +54,7 @@ def manage_client_places(request):
         if formset.is_valid():
             formset.save()
             messages.success(request, "The places were updated successfully.")
-            return redirect(reverse('cis:manage_client_places'))
+            return redirect('cis:manage_client_places')
 
     return render(request, 'cis/manage_client_places.html', {
         'formset': formset,
@@ -104,7 +105,7 @@ class ManufacturerDetailView(UserApprovedMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['num_appliances'] = Appliance.objects.filter(
             manufacturer=context['manufacturer'],
-            client=self.request.user,
+            client=self.request.user.client,
         ).count()
         return context
 
@@ -156,9 +157,16 @@ def send_ci_pack(request):
         try:
             pack = CIPack.objects.create(responsible=request.user)
             ci_pks = request.POST.getlist('cis_selected')
-            pack.send_to_production(ci_pks)
-            messages.success(request, 'Pack created.')
+            if ci_pks:
+                pack.send_to_production(ci_pks)
+                messages.success(request, ngettext(
+                    'The selected CI was sent to production successfully.',
+                    'The selected CIs were sent to production successfully.',
+                    len(ci_pks)
+                ))
+            else:
+                messages.error(request, 'Please select at least one item to be sent to production.')
         except DatabaseError:
             raise DatabaseError('There was an error during the sending of the CIs to production.')
 
-    return render(request, 'homepage.html')
+    return redirect('cis:ci_list', 0)
