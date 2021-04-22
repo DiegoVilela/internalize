@@ -33,7 +33,7 @@ class CommonTestMixin:
     setUpClass()/tearDownClass().
     """
 
-    fixtures = ['users.json']
+    fixtures = ['all.json']
 
     @classmethod
     def setUpClass(cls):
@@ -111,11 +111,6 @@ class LoginTest(CommonTestMixin, StaticLiveServerTestCase):
 class SiteTest(CommonTestMixin, StaticLiveServerTestCase):
     """Test all features related to the Place model."""
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.fixtures.append('places.json')
-
     def test_create_place(self):
         self.driver.get(f'{self.live_server_url}/{app_name}/place/create/')
         h1 = self.driver.find_element(By.TAG_NAME, 'h1')
@@ -133,13 +128,13 @@ class SiteTest(CommonTestMixin, StaticLiveServerTestCase):
     def test_viewing_place(self):
         self.driver.get(f'{self.live_server_url}/{app_name}/place/1')
         new_place = self.driver.find_element(By.ID, 'id_name')
-        self.assertEqual(new_place.get_attribute('value'), 'Place 1')
+        self.assertEqual(new_place.get_attribute('value'), 'Main')
 
     def test_listing_places(self):
         self.driver.get(f'{self.live_server_url}/{app_name}/places/')
-        for i in range(3):
+        for i in range(2):
             place = self.driver.find_element(By.ID, f'id_place_set-{i}-name')
-            self.assertEqual(place.get_attribute('value'), f'Place {i+1}')
+            self.assertTrue(place.get_attribute('value') in {'Main', 'Branch'})
 
     def test_deleting_place(self):
         self.driver.get(f'{self.live_server_url}/{app_name}/places/')
@@ -152,11 +147,6 @@ class SiteTest(CommonTestMixin, StaticLiveServerTestCase):
 @tag('functional')
 class ApplianceTest(CommonTestMixin, StaticLiveServerTestCase):
     """Test all features related to the Appliance model."""
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.fixtures.append('appliances.json')
 
     def test_create_appliance(self):
         self.driver.get(f'{self.live_server_url}/{app_name}/appliance/create/')
@@ -181,7 +171,7 @@ class ApplianceTest(CommonTestMixin, StaticLiveServerTestCase):
         _id = 3
         self.driver.get(f'{self.live_server_url}/{app_name}/appliance/{_id}')
         serial = self.driver.find_element(By.ID, 'id_serial_number')
-        self.assertEqual(serial.get_attribute('value'), f'ABC12{_id}')
+        self.assertEqual(serial.get_attribute('value'), f'SERIAL{_id}')
 
     def test_listing_appliances(self):
         self.driver.get(f'{self.live_server_url}/{app_name}/appliances/')
@@ -190,7 +180,7 @@ class ApplianceTest(CommonTestMixin, StaticLiveServerTestCase):
 
         serials = self.driver.find_elements(By.CSS_SELECTOR, 'td>a')
         for i, serial in enumerate(serials):
-            self.assertEqual(serial.text, f'ABC12{i + 1}')
+            self.assertEqual(serial.text, f'SERIAL{i + 1}')
 
     def test_view_appliance_from_listing(self):
         self.driver.get(f'{self.live_server_url}/{app_name}/appliances/')
@@ -204,11 +194,6 @@ class ApplianceTest(CommonTestMixin, StaticLiveServerTestCase):
 @tag('functional')
 class CITest(CommonTestMixin, StaticLiveServerTestCase):
     """Test all features related to the CI model."""
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.fixtures.extend(['places.json', 'appliances.json', 'cis.json'])
 
     def test_create_ci(self):
         self.driver.get(f'{self.live_server_url}/{app_name}/ci/create/')
@@ -245,7 +230,7 @@ class CITest(CommonTestMixin, StaticLiveServerTestCase):
 
         cis = self.driver.find_elements(By.CSS_SELECTOR, 'td>a')
         for hostname in cis:
-            hostnames = ('SW-CORE', 'SW-FL1', 'SW-FL2')
+            hostnames = ('CORE', 'FLW2', 'FLW3')
             self.assertTrue(hostname.text in hostnames)
 
     def test_view_ci_from_listing(self):

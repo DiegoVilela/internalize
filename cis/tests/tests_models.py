@@ -1,7 +1,6 @@
 from django.shortcuts import reverse
 from django.test import TestCase
 from django.db.utils import IntegrityError
-from django.utils import timezone
 
 from accounts.models import User
 from ..models import Client, Place, Manufacturer, Contract, Appliance, CI, CIPack
@@ -12,8 +11,13 @@ MANUFACTURER = 'Cisco'
 CONTRACT_NAME = 'BR-001'
 
 
-class ClientTest(TestCase):
-    fixtures = ['data_models.json']
+class FixtureMixin:
+    """Add the same fixture to all TestCase"""
+
+    fixtures = ['all.json']
+
+
+class ClientTest(FixtureMixin, TestCase):
 
     def test_client_as_string_returns_name(self):
         client = Client.objects.get(pk=1)
@@ -24,8 +28,7 @@ class ClientTest(TestCase):
             Client.objects.create(name=CLIENT_NAME)
 
 
-class PlaceTest(TestCase):
-    fixtures = ['data_models.json']
+class PlaceTest(FixtureMixin, TestCase):
 
     def test_as_string_returns_client_plus_place_name(self):
         place = Place.objects.get(pk=1)
@@ -48,8 +51,7 @@ class PlaceTest(TestCase):
         )
 
 
-class ManufacturerTest(TestCase):
-    fixtures = ['data_models.json']
+class ManufacturerTest(FixtureMixin, TestCase):
 
     def test_as_string_returns_name(self):
         manufacturer = Manufacturer.objects.get(pk=1)
@@ -60,16 +62,14 @@ class ManufacturerTest(TestCase):
             Manufacturer.objects.create(name=MANUFACTURER)
 
 
-class ContractTest(TestCase):
-    fixtures = ['data_models.json']
+class ContractTest(FixtureMixin, TestCase):
 
     def test_as_string_returns_name(self):
         contract = Contract.objects.get(pk=1)
         self.assertEqual(str(contract), CONTRACT_NAME)
 
 
-class ApplianceTest(TestCase):
-    fixtures = ['data_models.json']
+class ApplianceTest(FixtureMixin, TestCase):
 
     def test_as_string_returns_full_name(self):
         appliance = Appliance.objects.get(pk=1)
@@ -92,8 +92,7 @@ class ApplianceTest(TestCase):
         )
 
 
-class CITest(TestCase):
-    fixtures = ['data_models.json']
+class CITest(FixtureMixin, TestCase):
 
     def test_as_string_returns_full_name(self):
         ci = CI.objects.get(pk=1)
@@ -126,8 +125,7 @@ class CITest(TestCase):
         )
 
 
-class CIPackTest(TestCase):
-    fixtures = ['data_models.json', 'users.json']
+class CIPackTest(FixtureMixin, TestCase):
 
     @classmethod
     def setUpTestData(cls):
