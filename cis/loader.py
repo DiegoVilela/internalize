@@ -1,3 +1,5 @@
+import logging
+
 from collections import namedtuple
 from openpyxl import load_workbook
 from django.db import IntegrityError, transaction
@@ -8,6 +10,9 @@ from .cis_mapping import CLIENT_CELL, HOSTNAME, IP, DESCRIPTION, \
     CREDENTIAL_PASSWORD, CREDENTIAL_ENABLE_PASSWORD, CREDENTIAL_INSTRUCTIONS, \
     SUMMARY_SHEET, CIS_SHEET, APPLIANCES_SHEET, APPLIANCE_HOSTNAME, APPLIANCE_SERIAL_NUMBER, \
     APPLIANCE_MANUFACTURER, APPLIANCE_MODEL, APPLIANCE_VIRTUAL
+
+
+logger = logging.getLogger(__name__)
 
 
 class CILoader:
@@ -22,6 +27,7 @@ class CILoader:
 
     def save(self):
         cis_sheet = self._workbook[CIS_SHEET]
+        logger.info(f'The method save() of the class {self.__class__.__name__} was called.')
 
         Error = namedtuple('Error', ['exc', 'row'])
         for row in cis_sheet.iter_rows(min_row=2, values_only=True):
@@ -30,8 +36,10 @@ class CILoader:
                     ci = self._create_ci(row)
                     ci.appliances.set(self._get_ci_appliances(ci, row))
                 self.cis.append(ci)
+                logger.info(f'{ci} was added to self.cis')
             except IntegrityError as e:
                 self.errors.append(Error(e, row))
+                logger.error(f'{e} spreadsheet row: {row} was added to self.errors')
         return self
 
     def _create_ci(self, row):
@@ -68,33 +76,33 @@ class CILoader:
         if row[SITE] in self.places:
             return self.places[row[SITE]]
         else:
-            self.places[row[SITE]], created = Place.objects.get_or_create(
+            self.places[row[SITE]] = Place.objects.get_or_create(
                 name=row[SITE],
                 description=row[SITE_DESCRIPTION],
                 client=self.client
-            )
+            )[0]
             return self.places[row[SITE]]
 
     def _get_contract(self, row):
         if row[CONTRACT] in self.contracts:
             return self.contracts[row[CONTRACT]]
         else:
-            self.contracts[row[CONTRACT]], created = Contract.objects.get_or_create(
+            self.contracts[row[CONTRACT]] = Contract.objects.get_or_create(
                 description=row[CONTRACT_DESCRIPTION],
                 name=row[CONTRACT],
                 begin=row[CONTRACT_BEGIN],
                 end=row[CONTRACT_END],
-            )
+            )[0]
             return self.contracts[row[CONTRACT]]
 
     def _get_appliance(self, row):
-        appliance, created = Appliance.objects.get_or_create(
+        appliance = Appliance.objects.get_or_create(
             client=self.client,
             serial_number=row[APPLIANCE_SERIAL_NUMBER],
             manufacturer=self._get_manufacturer(row[APPLIANCE_MANUFACTURER]),
             model=row[APPLIANCE_MODEL],
             virtual=bool(str(row[APPLIANCE_VIRTUAL]).strip())
-        )
+        )[0]
         return appliance
 
     def _get_manufacturer(self, name):
