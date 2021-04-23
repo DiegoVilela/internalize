@@ -80,8 +80,8 @@ class ApplianceAdmin(admin.ModelAdmin, ClientLinkMixin):
     )
     list_filter = ('client', 'manufacturer', 'virtual')
     list_editable = ('model', 'virtual')
-    search_fields = ('serial_number', 'model', 'client__name', 'manufacturer__name')
-    autocomplete_fields = ('client', 'manufacturer')
+    search_fields = ('serial_number', 'model', 'client', 'manufacturer')
+    #autocomplete_fields = ('client', 'manufacturer')
 
     @admin.display(description='Manufacturer', ordering='manufacturer__name')
     def manufacturer_link(self, obj):

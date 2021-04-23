@@ -35,7 +35,7 @@ class Client(Company):
     search_fields = ('name',)
 
     def get_absolute_url(self):
-        return reverse('cis:client_detail', args=[self.id])
+        return reverse('cis:client_detail', args=(self.id,))
 
     def __str__(self):
         return self.name
@@ -52,7 +52,7 @@ class Place(models.Model):
         return f"{self.client} | {self.name}"
 
     def get_absolute_url(self):
-        return reverse('cis:place_update', args=[self.pk])
+        return reverse('cis:place_update', args=(self.pk,))
 
     class Meta:
         constraints = [
@@ -69,8 +69,6 @@ class ISP(Company):
 
 class Manufacturer(Company):
     """Model representing a Manufacturer of a Configuration Item"""
-
-    search_fields = ('name',)
 
 
 class Circuit(models.Model):
@@ -120,7 +118,7 @@ class Appliance(models.Model):
         return f"{self.manufacturer} | {self.model} | {self.serial_number}"
 
     def get_absolute_url(self):
-        return reverse('cis:appliance_update', args=[self.pk])
+        return reverse('cis:appliance_update', args=(self.pk,))
 
     class Meta:
         ordering = ['serial_number']
@@ -216,7 +214,7 @@ class CI(Credential):
         return f"{self.place} | {self.hostname} | {self.ip}"
 
     def get_absolute_url(self):
-        return reverse('cis:ci_detail', args=[self.pk])
+        return reverse('cis:ci_detail', args=(self.pk,))
 
     class Meta:
         ordering = ['hostname']
