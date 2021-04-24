@@ -174,6 +174,22 @@ class PlaceApplianceAndCIViewTest(TestCase):
                 self.assertContains(response, text, count=1)
 
 
+class AdminActionViewTest(TestCase):
+    fixtures = ['all.json']
+
+    def test_mark_selected_cis_as_approved_action(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        data = {
+            'action': 'approve_selected_cis',
+            '_selected_action': [1, 2],
+        }
+        response = self.client.post(reverse('admin:cis_ci_changelist'), data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'The selected CIs were approved successfully.')
+        self.assertTemplateUsed(response, 'admin/change_list.html')
+
+
 def create_appliance(client, manufacturer, letter):
     return Appliance.objects.create(
         client=client,
