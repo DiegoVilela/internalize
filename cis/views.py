@@ -169,4 +169,4 @@ def send_ci_pack(request):
         except DatabaseError:
             raise DatabaseError('There was an error during the sending of the CIs to production.')
 
-    return redirect('cis:ci_list', 0)
+    return redirect('cis:ci_list', status=0)
