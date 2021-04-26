@@ -11,9 +11,12 @@ django-extensions = "*"
 psycopg2-binary = "*"
 django-allauth = "*"
 django-fernet-fields = "*"
+gunicorn = "*"
+django-heroku = "*"
+whitenoise = "*"
+django-debug-toolbar = "*"
 
 [dev-packages]
-django-debug-toolbar = "*"
 selenium = "*"
 
 [requires]
