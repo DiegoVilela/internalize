@@ -1,0 +1,1 @@
+web: gunicorn internalize:wsgi
