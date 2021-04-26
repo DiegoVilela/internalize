@@ -1,1 +1,1 @@
-web: gunicorn internalize:wsgi
+web: gunicorn internalize.wsgi
