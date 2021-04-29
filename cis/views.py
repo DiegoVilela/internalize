@@ -79,10 +79,14 @@ class CIListView(UserApprovedMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return CI.objects.filter(
+        qs = CI.objects.filter(
             status=self.kwargs['status'],
             place__client=self.request.user.client
         )
+        if self.request.user.is_superuser:
+            qs = CI.objects.filter(status=self.kwargs['status'])
+
+        return qs
 
 
 class CIDetailView(UserApprovedMixin, DetailView):
@@ -91,9 +95,10 @@ class CIDetailView(UserApprovedMixin, DetailView):
 
     def get_object(self, **kwargs):
         object = super().get_object(**kwargs)
-        if object.place.client != self.request.user.client:
-            # user authenticated but unauthorized
-            raise Http404
+        if not self.request.user.is_superuser:
+            if object.place.client != self.request.user.client:
+                # user authenticated but unauthorized
+                raise Http404
         # user authenticated and authorized
         return object
 
