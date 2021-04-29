@@ -141,7 +141,8 @@ def ci_upload(request):
     if request.method == 'POST':
         form = UploadCIsForm(request.POST, request.FILES)
         if form.is_valid():
-            result = CILoader(request.FILES['file']).save()
+            client = request.user.client
+            result = CILoader(request.FILES['file'], client).save()
 
     return render(request, 'cis/ci_upload.html', {
         'form': form,

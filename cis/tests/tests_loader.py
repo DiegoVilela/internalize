@@ -3,9 +3,10 @@ from collections import namedtuple
 from openpyxl import Workbook
 from django.test import TestCase
 
+from accounts.models import User
 from ..models import Client, Place, Contract, Manufacturer
 from ..loader import CILoader
-from ..cis_mapping import CLIENT_CELL, SUMMARY_SHEET, CIS_SHEET, \
+from ..cis_mapping import CIS_SHEET, \
     APPLIANCES_SHEET
 
 SPREADSHEET_FILE = 'cis_test.xlsx'
@@ -17,7 +18,8 @@ class CILoaderTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         create_workbook()
-        cls.loader = CILoader(SPREADSHEET_FILE).save()
+        cls.company_client = Client.objects.create(name=CLIENT_NAME)
+        cls.loader = CILoader(SPREADSHEET_FILE, cls.company_client).save()
 
     @classmethod
     def tearDownClass(cls):
@@ -54,7 +56,7 @@ class CILoaderTest(TestCase):
 
     def test_errors_contain_duplicated_items(self):
         create_workbook()
-        loader = CILoader(SPREADSHEET_FILE).save()
+        loader = CILoader(SPREADSHEET_FILE, self.company_client).save()
         self.assertEqual(len(loader.errors), 5)
         self.assertEqual(len(loader.cis), 0)
         self.assertTrue(
@@ -64,16 +66,9 @@ class CILoaderTest(TestCase):
 
 def create_workbook():
     wb = Workbook()
-    set_summary_sheet(wb)
     set_cis_sheet(wb)
     set_appliances_sheet(wb)
     wb.save(filename=SPREADSHEET_FILE)
-
-
-def set_summary_sheet(workbook):
-    summary_sheet = workbook.active
-    summary_sheet.title = SUMMARY_SHEET
-    summary_sheet[CLIENT_CELL] = CLIENT_NAME
 
 
 def set_cis_sheet(workbook):
