@@ -11,7 +11,7 @@ from django.forms import inlineformset_factory
 from django.core.exceptions import PermissionDenied
 
 from .models import CI, Client, Place, Manufacturer, Appliance, CIPack
-from .forms import UploadCIsForm, CIForm, ApplianceForm
+from .forms import UploadCIsForm, CIForm, ApplianceForm, PlaceForm
 from .loader import CILoader
 from .mixins import UserApprovedMixin, AddClientMixin
 
@@ -33,8 +33,13 @@ class PlaceCreateView(UserApprovedMixin, SuccessMessageMixin, AddClientMixin, Cr
 class PlaceUpdateView(UserApprovedMixin, SuccessMessageMixin, UpdateView):
     model = Place
     fields = ('name', 'description')
-    queryset = Place.objects.select_related('client')
     success_message = "The place %(name)s was updated successfully."
+
+    def get_queryset(self):
+        qs = Place.objects.select_related('client')
+        if not self.request.user.is_superuser:
+            qs.filter(client=self.request.user.client)
+        return qs
 
 
 @login_required
@@ -42,11 +47,19 @@ def manage_client_places(request):
     if not request.user.is_approved: raise PermissionDenied()
 
     client = request.user.client
+    select_client_form = None
+    if request.user.is_superuser:
+        select_client_form = PlaceForm()
+
+    if request.method == 'GET':
+        if request.user.is_superuser:
+            if (client_id_selected := request.GET.get('client')):
+                # At this point, a client was selected by a superuser
+                select_client_form = PlaceForm(request.GET)
+                client = Client.objects.get(pk=client_id_selected)
+
     PlaceInlineFormSet = inlineformset_factory(
-        Client, Place,
-        fields=('name', 'description'),
-        extra=0,
-    )
+        Client, Place, fields=('name', 'description'), extra=0)
     formset = PlaceInlineFormSet(instance=client)
 
     if request.method == 'POST':
@@ -58,6 +71,7 @@ def manage_client_places(request):
 
     return render(request, 'cis/manage_client_places.html', {
         'formset': formset,
+        'select_client_form': select_client_form,
         'client': client,
     })
 
@@ -108,10 +122,13 @@ class ManufacturerDetailView(UserApprovedMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['num_appliances'] = Appliance.objects.filter(
-            manufacturer=context['manufacturer'],
-            client=self.request.user.client,
-        ).count()
+        qs = Appliance.objects.filter(
+            manufacturer=context['manufacturer']
+        )
+        if not self.request.user.is_superuser:
+            qs.filter(client=self.request.user.client)
+        context['num_appliances'] = qs.count()
+
         return context
 
 
@@ -120,7 +137,10 @@ class ApplianceListView(UserApprovedMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return Appliance.objects.filter(client=self.request.user.client)
+        qs = Appliance.objects.all()
+        if not self.request.user.is_superuser:
+            qs.filter(client=self.request.user.client)
+        return qs
 
 
 class ApplianceCreateView(UserApprovedMixin, SuccessMessageMixin, AddClientMixin, CreateView):
@@ -132,9 +152,13 @@ class ApplianceCreateView(UserApprovedMixin, SuccessMessageMixin, AddClientMixin
 class ApplianceUpdateView(UserApprovedMixin, SuccessMessageMixin, UpdateView):
     model = Appliance
     form_class = ApplianceForm
-    queryset = Appliance.objects.select_related('client', 'manufacturer')
     success_message = "The appliance was updated successfully."
 
+    def get_queryset(self):
+        qs = Appliance.objects.select_related('client', 'manufacturer')
+        if not self.request.user.is_superuser:
+            qs.filter(client=self.request.user.client)
+        return qs
 
 @login_required
 def ci_upload(request):
