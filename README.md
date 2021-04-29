@@ -23,9 +23,9 @@ You can access it [here](https://) with the following credentials.
 
 | username | password |
 | -------- | -------- |
-| admin | 123456 |
+| admin | UnQt5uGgjErbwkN |
 | client_a_user@example.com | UnQt5uGgjErbwkN |
-| client_b_user@example.com | UnQt5uGgjErbwkN |
+| client_a_user@example.com | UnQt5uGgjErbwkN |
 
 ## Heroku Setup
 1. Create a `Procfile` at the root of the project with the following:
