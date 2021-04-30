@@ -123,10 +123,11 @@ class ManufacturerDetailView(UserApprovedMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         qs = Appliance.objects.filter(
-            manufacturer=context['manufacturer']
+            manufacturer=context['manufacturer'],
+            client=self.request.user.client,
         )
-        if not self.request.user.is_superuser:
-            qs.filter(client=self.request.user.client)
+        if self.request.user.is_superuser:
+            qs = Appliance.objects.filter(manufacturer=context['manufacturer'])
         context['num_appliances'] = qs.count()
 
         return context
@@ -137,9 +138,9 @@ class ApplianceListView(UserApprovedMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        qs = Appliance.objects.all()
-        if not self.request.user.is_superuser:
-            qs.filter(client=self.request.user.client)
+        qs = Appliance.objects.filter(client=self.request.user.client)
+        if self.request.user.is_superuser:
+            qs = super().get_queryset()
         return qs
 
 
