@@ -19,7 +19,7 @@ its clients.
 
 ## Live Demo
 
-You can access it [here](https://https://secure-forest-64714.herokuapp.com/cis/cis/0/) with the following credentials.
+You can access it [here](https://secure-forest-64714.herokuapp.com/cis/cis/0/) with the following credentials.
 
 | username | password |
 | -------- | -------- |
