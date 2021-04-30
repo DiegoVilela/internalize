@@ -19,13 +19,16 @@ its clients.
 
 ## Live Demo
 
-You can access it [here](https://secure-forest-64714.herokuapp.com/cis/cis/0/) with the following credentials.
+You can access it with the following credentials.
 
-| username | password |
-| -------- | -------- |
-| admin | UnQt5uGgjErbwkN |
-| client_a_user@example.com | UnQt5uGgjErbwkN |
-| client_b_user@example.com | UnQt5uGgjErbwkN |
+| username | password | login page |
+| -------- | -------- | -----------|
+| admin | UnQt5uGgjErbwkN | [for admins][2]
+| client_a_user@example.com | UnQt5uGgjErbwkN | [for users][1]
+| client_b_user@example.com | UnQt5uGgjErbwkN | [for users][1]
+
+[1]: https://secure-forest-64714.herokuapp.com/cis/cis/0/
+[2]: https://secure-forest-64714.herokuapp.com/admin/
 
 ## Heroku Setup
 1. Create a `Procfile` at the root of the project with the following:
