@@ -23,6 +23,9 @@
                     {% if '0' in request.path_info %}
                         <th><input id="js-toggler" type="checkbox" title="Deselect all" checked></th>
                     {% endif %}
+                    {% if user.is_superuser %}
+                        <th>Client</th>
+                    {% endif %}
                     <th>Hostname</th>
                     <th>IP</th>
                     <th>Description</th>
@@ -35,6 +38,9 @@
                     <tr>
                         {% if '0' in request.path_info %}
                             <td><input class="js-items" type="checkbox" name="cis_selected" value="{{ ci.pk }}" checked></td>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                            <td>{{ ci.client.name }}</td>
                         {% endif %}
                         <td><a href="{% url 'cis:ci_detail' ci.pk %}">{{ ci.hostname }}</a></td>
                         <td>{{ ci.ip }}</td>
