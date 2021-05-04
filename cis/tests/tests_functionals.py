@@ -18,8 +18,8 @@ from accounts.models import User
 from ..models import Client, CI
 from ..urls import app_name
 
-LOGIN = 'user1@example.com'
-PASSWORD = '123456'
+LOGIN = 'client_a_user@example.com'
+PASSWORD = 'UnQt5uGgjErbwkN'
 SESSION_COOKIE = settings.SESSION_COOKIE_NAME
 
 

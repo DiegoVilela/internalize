@@ -3,16 +3,24 @@
     "model": "cis.client",
     "pk": 1,
     "fields": {
-        "name": "The Client"
+        "name": "Client A"
+    }
+},
+{
+    "model": "cis.client",
+    "pk": 2,
+    "fields": {
+        "name": "Client B"
     }
 },
 {
     "model": "accounts.user",
     "pk": 1,
     "fields": {
-        "password": "pbkdf2_sha256$260000$kDqA6NgoKYNsu1B1unpBuS$4c07pvdV+wy5G9f7UoDys2fiVUJg9yQeEfadv4c8+i8=",
-        "username": "user1",
-        "email": "user1@example.com",
+        "password": "pbkdf2_sha256$260000$bEN5OLKt1oHBKwFqigb8yU$TRRg4gB3cHbftXnEBAbmPaoAsDBBe6N/OYtbndXTyDM=",
+        "is_superuser": false,
+        "username": "client_a_user",
+        "email": "client_a_user@example.com",
         "is_active": true,
         "client": 1,
         "groups": [],
@@ -24,7 +32,7 @@
     "pk": 1,
     "fields": {
         "user": 1,
-        "email": "user1@example.com",
+        "email": "client_a_user@example.com",
         "verified": true,
         "primary": true
     }
@@ -33,13 +41,36 @@
     "model": "accounts.user",
     "pk": 2,
     "fields": {
-        "password": "pbkdf2_sha256$260000$4FilqvfSnCYScz5FWYhA20$59kZIDkCDdTCp3XL3/2LZxlFxNcsp6saJev2Sw9WULQ=",
+        "password": "pbkdf2_sha256$260000$bEN5OLKt1oHBKwFqigb8yU$TRRg4gB3cHbftXnEBAbmPaoAsDBBe6N/OYtbndXTyDM=",
+        "is_superuser": false,
+        "username": "client_b_user",
+        "email": "client_b_user@example.com",
+        "is_active": true,
+        "client": 2,
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "account.emailaddress",
+    "pk": 2,
+    "fields": {
+        "user": 2,
+        "email": "client_b_user@example.com",
+        "verified": true,
+        "primary": true
+    }
+},
+{
+    "model": "accounts.user",
+    "pk": 3,
+    "fields": {
+        "password": "pbkdf2_sha256$260000$g7pLuR6iO9j0lbOxT1mqvr$sd5eO/vDae9ySIXwbivilC7dI8XTule4VlgNEHZWH9w=",
         "is_superuser": true,
         "username": "admin",
         "email": "admin@example.com",
         "is_staff": true,
         "is_active": true,
-        "date_joined": "2021-04-20T18:28:34.314Z",
         "groups": [],
         "user_permissions": []
     }

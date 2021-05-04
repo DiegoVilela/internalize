@@ -5,7 +5,7 @@ from django.db.utils import IntegrityError
 from accounts.models import User
 from ..models import Client, Place, Manufacturer, Contract, Appliance, CI, CIPack
 
-CLIENT_NAME = 'The Client'
+CLIENT_NAME = 'Client A'
 PLACE_NAME = 'Main'
 MANUFACTURER = 'Cisco'
 CONTRACT_NAME = 'BR-001'
