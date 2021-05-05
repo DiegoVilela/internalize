@@ -209,5 +209,27 @@ INTERNAL_IPS = ['127.0.0.1']
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 
+# Sets a strict policy to disable many potentially privacy-invading and annoying features for all scripts.
+# https://pypi.org/project/django-permissions-policy/
+
+PERMISSIONS_POLICY = {
+    "accelerometer": [],
+    "ambient-light-sensor": [],
+    "autoplay": [],
+    "camera": [],
+    "document-domain": [],
+    "encrypted-media": [],
+    "fullscreen": [],
+    "geolocation": [],
+    "gyroscope": [],
+    "interest-cohort": [],
+    "magnetometer": [],
+    "microphone": [],
+    "midi": [],
+    "payment": [],
+    "usb": [],
+}
+
+
 # Activate Django-Heroku.
 django_heroku.settings(locals())

@@ -15,6 +15,7 @@ gunicorn = "*"
 django-heroku = "*"
 whitenoise = "*"
 django-debug-toolbar = "*"
+django-permissions-policy = "*"
 
 [dev-packages]
 selenium = "*"
