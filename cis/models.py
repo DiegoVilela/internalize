@@ -164,6 +164,9 @@ class CIPack(models.Model):
         self.ci_set.set(cis)
         self.ci_set.update(status=1)
 
+    def approve_all_cis(self):
+        self.ci_set.update(status=2)
+
     def __len__(self):
         return self.ci_set.count()
 
