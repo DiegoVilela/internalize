@@ -200,9 +200,29 @@ class CIPackAdmin(admin.ModelAdmin):
     FIELDS = ('sent_at', 'responsible', 'percentage_of_cis_approved', 'approved_by')
 
     list_display = FIELDS
+    actions = ['approve_all_cis']
     list_filter = ('responsible', 'sent_at', 'approved_by')
     readonly_fields = FIELDS
     inlines = (CIInline,)
+
+    @admin.action(description="Approve all CIs of selected CIPacks")
+    def approve_all_cis(self, request, queryset: QuerySet):
+        # todo Write test
+        try:
+            with transaction.atomic():
+                for pack in queryset:
+                    pack.approve_all_cis()
+            self.message_user(
+                request,
+                ngettext(
+                    'The selected CI pack was approved successfully.',
+                    'The selected CI packs were approved successfully.',
+                    len(queryset)
+                ),
+                level=messages.SUCCESS,
+            )
+        except DatabaseError as e:
+            raise DatabaseError(f'An error occurred during the approval: {e}')
 
 # admin.site.register(ISP)
 # admin.site.register(Circuit)
