@@ -7,7 +7,7 @@ from ..models import Client, Place, Manufacturer, Contract, Appliance, CI, CIPac
 
 CLIENT_NAME = 'Client A'
 PLACE_NAME = 'Main'
-MANUFACTURER = 'Cisco'
+MANUFACTURER = 'Cisco Systems'
 CONTRACT_NAME = 'BR-001'
 
 
