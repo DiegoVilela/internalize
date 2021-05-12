@@ -205,6 +205,12 @@ class AdminViewTest(TestCase):
         for place in Place.objects.all():
             self.assertContains(response, place.name)
 
+    def test_appliance_manufacturer_links(self):
+        response = self.client.get(reverse('admin:cis_appliance_changelist'), follow=True)
+        self.assertEqual(response.status_code, 200)
+        for manufacturer in Manufacturer.objects.exclude(appliance=None):
+            self.assertContains(response, manufacturer.name)
+
 
 def create_appliance(client, manufacturer, letter):
     return Appliance.objects.create(
