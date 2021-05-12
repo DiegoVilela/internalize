@@ -199,6 +199,12 @@ class AdminViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(self.user.is_approved)
 
+    def test_client_places_links(self):
+        response = self.client.get(reverse('admin:cis_client_changelist'), follow=True)
+        self.assertEqual(response.status_code, 200)
+        for place in Place.objects.all():
+            self.assertContains(response, place.name)
+
 
 def create_appliance(client, manufacturer, letter):
     return Appliance.objects.create(
