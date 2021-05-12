@@ -207,7 +207,6 @@ class CIPackAdmin(admin.ModelAdmin):
 
     @admin.action(description="Approve all CIs of selected CIPacks")
     def approve_all_cis(self, request, queryset: QuerySet):
-        # todo Write test
         try:
             with transaction.atomic():
                 for pack in queryset:

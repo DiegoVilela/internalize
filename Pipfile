@@ -19,6 +19,7 @@ django-permissions-policy = "*"
 
 [dev-packages]
 selenium = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.8"

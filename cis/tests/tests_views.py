@@ -174,12 +174,17 @@ class PlaceApplianceAndCIViewTest(TestCase):
                 self.assertContains(response, text, count=1)
 
 
-class AdminActionViewTest(TestCase):
+class AdminViewTest(TestCase):
     fixtures = ['all.json']
 
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.get(username='admin')
+
+    def setUp(self):
+        self.client.force_login(self.user)
+
     def test_mark_selected_cis_as_approved_action(self):
-        user = User.objects.get(username='admin')
-        self.client.force_login(user)
         data = {
             'action': 'approve_selected_cis',
             '_selected_action': [1, 2],
@@ -188,6 +193,23 @@ class AdminActionViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'The selected CIs were approved successfully.')
         self.assertTemplateUsed(response, 'admin/change_list.html')
+
+    def test_user_display_approved(self):
+        response = self.client.get(reverse('admin:accounts_user_changelist'), follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(self.user.is_approved)
+
+    def test_client_places_links(self):
+        response = self.client.get(reverse('admin:cis_client_changelist'), follow=True)
+        self.assertEqual(response.status_code, 200)
+        for place in Place.objects.all():
+            self.assertContains(response, place.name)
+
+    def test_appliance_manufacturer_links(self):
+        response = self.client.get(reverse('admin:cis_appliance_changelist'), follow=True)
+        self.assertEqual(response.status_code, 200)
+        for manufacturer in Manufacturer.objects.exclude(appliance=None):
+            self.assertContains(response, manufacturer.name)
 
 
 def create_appliance(client, manufacturer, letter):
