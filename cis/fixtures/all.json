@@ -105,7 +105,91 @@
     "model": "cis.manufacturer",
     "pk": 1,
     "fields": {
-        "name": "Cisco"
+        "name": "Cisco Systems"
+    }
+},
+{
+    "model": "cis.manufacturer",
+    "pk": 2,
+    "fields": {
+        "name": "Juniper Networks"
+    }
+},
+{
+    "model": "cis.manufacturer",
+    "pk": 3,
+    "fields": {
+        "name": "F5 Networks"
+    }
+},
+{
+    "model": "cis.manufacturer",
+    "pk": 4,
+    "fields": {
+        "name": "Palo Alto Networks"
+    }
+},
+{
+    "model": "cis.manufacturer",
+    "pk": 5,
+    "fields": {
+        "name": "Check Point"
+    }
+},
+{
+    "model": "cis.manufacturer",
+    "pk": 6,
+    "fields": {
+        "name": "Dell"
+    }
+},
+{
+    "model": "cis.manufacturer",
+    "pk": 7,
+    "fields": {
+        "name": "Fortinet"
+    }
+},
+{
+    "model": "cis.manufacturer",
+    "pk": 8,
+    "fields": {
+        "name": "Citrix Systems"
+    }
+},
+{
+    "model": "cis.manufacturer",
+    "pk": 9,
+    "fields": {
+        "name": "VMware"
+    }
+},
+{
+    "model": "cis.manufacturer",
+    "pk": 10,
+    "fields": {
+        "name": "Splunk"
+    }
+},
+{
+    "model": "cis.manufacturer",
+    "pk": 11,
+    "fields": {
+        "name": "Avaya"
+    }
+},
+{
+    "model": "cis.manufacturer",
+    "pk": 12,
+    "fields": {
+        "name": "SolarWinds"
+    }
+},
+{
+    "model": "cis.manufacturer",
+    "pk": 13,
+    "fields": {
+        "name": "Huawei"
     }
 },
 {
@@ -134,7 +218,7 @@
     "fields": {
         "client": 1,
         "serial_number": "SERIAL2",
-        "manufacturer": 1,
+        "manufacturer": 2,
         "model": "ABC456"
     }
 },
@@ -144,7 +228,7 @@
     "fields": {
         "client": 1,
         "serial_number": "SERIAL3",
-        "manufacturer": 1,
+        "manufacturer": 4,
         "model": "ABC789"
     }
 },
