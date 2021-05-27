@@ -30,3 +30,9 @@ class ApplianceForm(forms.ModelForm):
     class Meta:
         model = Appliance
         exclude = ('client',)
+
+
+class PlaceForm(forms.ModelForm):
+    class Meta:
+        model = Place
+        fields = ('client',)

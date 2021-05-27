@@ -11,7 +11,7 @@ from django.forms import inlineformset_factory
 from django.core.exceptions import PermissionDenied
 
 from .models import CI, Client, Place, Manufacturer, Appliance, CIPack
-from .forms import UploadCIsForm, CIForm, ApplianceForm
+from .forms import UploadCIsForm, CIForm, ApplianceForm, PlaceForm
 from .loader import CILoader
 from .mixins import UserApprovedMixin, AddClientMixin
 
@@ -28,25 +28,6 @@ class PlaceCreateView(UserApprovedMixin, SuccessMessageMixin, AddClientMixin, Cr
     model = Place
     fields = ('name', 'description')
     success_message = "The place %(name)s was created successfully."
-
-    def get(self, request, *args, **kwargs):
-        if request.user.is_superuser:
-            messages.warning(request, 'Please use the admin area.')
-
-        return super().get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        self.object = None # As per `BaseCreateView`
-
-        form = self.get_form()
-        if form.is_valid():
-            if request.user.is_superuser:
-                messages.error(request, 'Please use the admin area.')
-                return self.form_invalid(form)
-
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
 
 
 class PlaceUpdateView(UserApprovedMixin, SuccessMessageMixin, UpdateView):
