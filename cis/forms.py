@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import CI, Place, Appliance, Client
+from .models import CI, Place, Appliance
 
 
 class UploadCIsForm(forms.Form):

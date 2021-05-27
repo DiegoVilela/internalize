@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib import messages
 
 
 class UserApprovedMixin(UserPassesTestMixin):
@@ -19,3 +20,22 @@ class AddClientMixin:
     def form_valid(self, form):
         form.instance.client = self.request.user.client
         return super().form_valid(form)
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_superuser:
+            messages.warning(request, 'Please use the admin area.')
+
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = None  # As per `BaseCreateView`
+
+        form = self.get_form()
+        if form.is_valid():
+            if request.user.is_superuser:
+                messages.error(request, 'Please use the admin area.')
+                return self.form_invalid(form)
+
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
